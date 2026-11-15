@@ -3,7 +3,7 @@
   'use strict';
   var D = self.RR_DATA, L = self.RR_LOGIC, EX = D.EXERCISES;
   var KEY = 'rangers-road-v1';
-  var VERSION = '1.0.6';
+  var VERSION = '1.0.7';
 
   var view = document.getElementById('view');
   var scrim = document.getElementById('scrim');
@@ -13,7 +13,7 @@
   var state = load();
   var tab = 'today';
   var timers = {};
-  var syncTimer = null, toastTimer = null, syncBusy = false;
+  var syncTimer = null, toastTimer = null, syncBusy = false, roadEnter = false;
 
   /* ---------- storage ---------- */
   function load() {
@@ -54,7 +54,13 @@
   function scene(id) {
     var sc = (self.RR_SCENES || {})[id];
     if (!sc) return '';
-    return '<figure class="scene"><svg viewBox="0 0 358 150" role="img" aria-label="' + esc(sc.alt) + '"><g class="far">' + sc.far + '</g><g class="mid">' + sc.mid + '</g><g class="near">' + sc.near + '</g></svg></figure>';
+    return '<figure class="scene"><svg class="art" viewBox="0 0 358 150" role="img" aria-label="' + esc(sc.alt) + '"><g class="far">' + sc.far + '</g><g class="mid">' + sc.mid + '</g><g class="near">' + sc.near + '</g></svg></figure>';
+  }
+  /* A wide strip of a stage's scene for the Road page: far and middle layers, in ink or in pencil. */
+  function strip(id, pencil) {
+    var sc = (self.RR_SCENES || {})[id];
+    if (!sc) return '';
+    return '<svg class="art strip' + (pencil ? ' pencil' : '') + '" viewBox="0 44 358 76" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g class="far">' + sc.far + '</g><g class="mid">' + sc.mid + '</g></svg>';
   }
   function flo(name) { return art('f-' + name, 'flo'); }
   function section(title) { return '<div class="section"><span>' + title + '</span>' + flo('diamonds') + '</div>'; }
@@ -170,8 +176,10 @@
   /* ---------- Road ---------- */
   function vRoad() {
     var idx = L.stageIndexAt(state.miles), done = L.finished(state);
+    /* On arriving at this page, ink advances from where it stood at the last visit. */
+    var seen = state.roadSeen || 0, animate = roadEnter && seen < state.miles, moving = 0;
     var h = '<header class="head"><div class="overline">The Ranger’s Road</div><h1>Hobbiton to the Black Gate</h1>' +
-      '<div class="sub">' + fmt(state.miles) + ' of ' + fmt(D.TOTAL_MILES) + ' miles. Tap a place you have reached to read its tale.</div></header><div class="road">';
+      '<div class="sub">' + fmt(state.miles) + ' of ' + fmt(D.TOTAL_MILES) + ' miles. Walked stages are in ink; the road ahead is in pencil. Tap a place you have reached to read its tale.</div></header><div class="road">';
     D.WAYPOINTS.forEach(function (w, i) {
       var reached = state.miles >= w.mile;
       if (i < D.STAGES.length && (i === 0 || D.STAGES[i].book !== D.STAGES[i - 1].book)) {
@@ -180,10 +188,18 @@
       h += '<div class="wp ' + (reached ? 'reached' : 'unreached') + (w.great ? ' great' : '') + '"><span class="dot"></span>' +
         '<button data-act="tale" data-wi="' + i + '"' + (reached ? '' : ' disabled') + '><span class="name">' + esc(w.name) + '</span><span class="mile">mile ' + fmt(w.mile) + '</span></button></div>';
       if (i < D.STAGES.length) {
-        var s = D.STAGES[i], here = !done && i === idx, cls = here ? 'here' : (state.miles >= s.to ? 'walked' : 'ahead');
-        h += '<div class="leg ' + cls + '">' + (here ? '<span class="you" role="img" aria-label="You are here"></span>' : '') +
-          '<svg aria-hidden="true"><use href="#g-' + s.glyph + '"></use></svg><div><div>' + esc(s.road) + '</div>' +
-          '<div class="it">' + (here ? 'You are here, ' + fmt(L.r1(s.to - state.miles)) + ' miles from ' + esc(D.WAYPOINTS[i + 1].name) + ' · ' : fmt(s.to - s.from) + ' miles · ') + 'with ' + esc(s.as) + ' ' + emblems(s.who, 'small') + '</div></div></div>';
+        var s = D.STAGES[i], here = !done && i === idx, walked = state.miles >= s.to, span = s.to - s.from;
+        var to = walked ? 100 : (here ? (state.miles - s.from) / span * 100 : 0);
+        var from = animate ? Math.max(0, Math.min(to, (seen - s.from) / span * 100)) : to;
+        var sc = (self.RR_SCENES || {})[s.scene];
+        var delay = from < to ? ';transition-delay:' + (Math.min(moving++, 4) * 0.25).toFixed(2) + 's' : '';
+        h += '<div class="leg ' + (here ? 'here' : (walked ? 'walked' : 'ahead')) + '">' + (here ? '<span class="you" role="img" aria-label="You are here"></span>' : '') +
+          '<div class="legtext"><div>' + esc(s.road) + '</div>' +
+          '<div class="it">' + (here ? 'You are here, ' + fmt(L.r1(s.to - state.miles)) + ' miles from ' + esc(D.WAYPOINTS[i + 1].name) + ' · ' : fmt(span) + ' miles · ') + 'with ' + esc(s.as) + ' ' + emblems(s.who, 'small') + '</div></div>' +
+          '<div class="stripbox" role="img" aria-label="' + esc(sc ? sc.alt : s.road) + '">' + strip(s.scene, true) +
+          (to > 0 ? '<div class="inked" data-to="' + to.toFixed(1) + '" style="clip-path:inset(0 ' + (100 - from).toFixed(1) + '% 0 0)' + delay + '">' + strip(s.scene, false) + '</div>' +
+            (here ? '<i class="mark" data-to="' + to.toFixed(1) + '" style="left:' + from.toFixed(1) + '%' + delay + '"></i>' : '') : '') +
+          '</div></div>';
       }
     });
     return h + '</div>';
@@ -450,6 +466,26 @@
       if (btns[i].dataset.tab === tab) btns[i].setAttribute('aria-current', 'page'); else btns[i].removeAttribute('aria-current');
     }
     paintTimers();
+    if (tab === 'road') afterRoad();
+  }
+  /* Let the ink run to its new position, bring the current leg into view, and remember how far it has been seen. */
+  function afterRoad() {
+    var enter = roadEnter, els = view.querySelectorAll('.inked, .mark');
+    roadEnter = false;
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        for (var i = 0; i < els.length; i++) {
+          var to = +els[i].getAttribute('data-to');
+          if (els[i].className === 'mark') els[i].style.left = to + '%';
+          else els[i].style.clipPath = 'inset(0 ' + (100 - to).toFixed(1) + '% 0 0)';
+        }
+      });
+    });
+    if (enter) {
+      var me = view.querySelector('.leg.here') || view.querySelector('.wp:last-child');
+      if (me && me.scrollIntoView) me.scrollIntoView({ block: 'center' });
+    }
+    if (state.roadSeen !== state.miles) { state.roadSeen = state.miles; saveLocal(); }
   }
   function paintTimers() {
     var els = document.querySelectorAll('[data-rest]'), now = Date.now();
@@ -473,7 +509,7 @@
 
   document.addEventListener('click', function (ev) {
     var t = ev.target.closest('[data-tab]');
-    if (t) { tab = t.dataset.tab; render(); self.scrollTo(0, 0); return; }
+    if (t) { tab = t.dataset.tab; roadEnter = tab === 'road'; self.scrollTo(0, 0); render(); return; }
     if (ev.target === scrim) { closeSheet(); return; }
     var a = ev.target.closest('[data-act]');
     if (a && !a.disabled && acts[a.dataset.act]) acts[a.dataset.act](a);

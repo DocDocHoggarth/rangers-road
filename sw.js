@@ -1,5 +1,5 @@
 /* Offline support: keep a copy of the app on the phone and refresh it quietly when online. */
-var CACHE = 'rangers-road-1.0.6';
+var CACHE = 'rangers-road-1.0.7';
 var SHELL = [
   './', 'index.html', 'styles.css', 'data.js', 'logic.js', 'app.js', 'art.js', 'scenes.js', 'manifest.webmanifest',
   'fell.woff2', 'fell-italic.woff2', 'fell-sc.woff2', 'numerals.woff2', 'numerals-italic.woff2', 'hand.woff2',

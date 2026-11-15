@@ -20,7 +20,7 @@
     var s = {
       v: 1, created: now.toISOString(), onboarded: false, miles: 0, seq: 0,
       ex: {}, log: [], trialsPending: [], trialsDone: {}, tales: { 0: true },
-      weeks: { through: null, streak: 0, best: 0 }, afar: {}, plan: null,
+      weeks: { through: null, streak: 0, best: 0 }, afar: {}, plan: null, roadSeen: 0,
       settings: { perWeek: 5, syncUrl: '', syncKey: '' },
       sync: { sent: 0, lastOk: null }
     };
