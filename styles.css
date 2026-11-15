@@ -81,6 +81,14 @@ h1, h2, h3, p { margin: 0; font-weight: 400; }
 .endflo { display: flex; justify-content: center; margin-top: 14px; }
 .endflo .flo { width: 80px; height: 24px; }
 
+/* Emblems of the peoples */
+.emb { width: 36px; height: 36px; flex-shrink: 0; color: var(--ink); }
+.emb.big { width: 46px; height: 46px; }
+.emb.small { width: 20px; height: 20px; vertical-align: -4px; }
+.who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.embs { display: flex; gap: 4px; flex-shrink: 0; }
+.card.done .emb, .leg.ahead .emb { opacity: 0.5; }
+
 /* Manuscript details */
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .initial { position: relative; float: left; width: 68px; height: 68px; margin: 5px 14px 4px 3px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--ink); border-image: var(--rule-img) 12 / 12px / 6px stretch; }

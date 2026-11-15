@@ -3,7 +3,7 @@
   'use strict';
   var D = self.RR_DATA, L = self.RR_LOGIC, EX = D.EXERCISES;
   var KEY = 'rangers-road-v1';
-  var VERSION = '1.0.3';
+  var VERSION = '1.0.4';
 
   var view = document.getElementById('view');
   var scrim = document.getElementById('scrim');
@@ -48,6 +48,8 @@
   function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigits: 1 }); }
   function half(n) { return n === 0.5 ? '½' : fmt(n); }
   function art(id, cls) { return '<svg' + (cls ? ' class="' + cls + '"' : '') + ' aria-hidden="true"><use href="#' + id + '"></use></svg>'; }
+  function emblem(pid, size) { return art(D.PEOPLES[pid].emblem, 'emb' + (size ? ' ' + size : '')); }
+  function emblems(who, size) { return who.map(function (p) { return emblem(p, size); }).join(''); }
   function flo(name) { return art('f-' + name, 'flo'); }
   function section(title) { return '<div class="section"><span>' + title + '</span>' + flo('diamonds') + '</div>'; }
   /* A paragraph's text with a decorated first letter. Screen readers get the plain text. */
@@ -109,7 +111,7 @@
     var why = it.done ? null : L.bonusFor(state, it.ex, new Date());
     var tag = why === 'company' ? '<span class="tag">+½ company</span>' : (why === 'afar' ? '<span class="tag">Word from afar</span>' : '');
     var h = '<article class="card' + (it.done || it.missed ? ' done' : '') + '">' +
-      '<div class="row top"><div><div class="overline">' + esc(people.name) + ' · ' + esc(people.trait) + '</div><h3>' + esc(e.name) + '</h3></div>' + tag + '</div>' +
+      '<div class="row top"><div class="who">' + emblem(e.people) + '<div><div class="overline">' + esc(people.name) + ' · ' + esc(people.trait) + '</div><h3>' + esc(e.name) + '</h3></div></div>' + tag + '</div>' +
       '<p class="muted">' + esc(p.rung.n) + (p.rung.d ? ' · ' + esc(p.rung.d) : '') + '</p>';
     if (it.done) return h + '<p class="hand" style="margin-top:6px">Done · ' + esc(it.note || '') + ' +' + fmt(it.earned) + ' miles</p></article>';
     if (it.missed) return h + '<p class="it muted" style="margin-top:6px">Fell short today. No miles lost.</p></article>';
@@ -148,7 +150,7 @@
     });
     var who = st.who.filter(function (p) { return p !== 'wizard'; }), ids = [];
     who.forEach(function (p) { ids = ids.concat(D.PEOPLES[p].ex); });
-    h += '<div class="card"><div class="overline">Your company</div><h3>' + esc(st.as) + '</h3>' +
+    h += '<div class="card"><div class="row top"><div><div class="overline">Your company</div><h3>' + esc(st.as) + '</h3></div><div class="embs">' + emblems(st.who, st.who.length > 2 ? '' : 'big') + '</div></div>' +
       '<p class="muted" style="margin-top:4px">' + (who.length >= 4 ? 'Every exercise earns the extra half mile.' : 'Their exercises earn an extra half mile: ' + esc(exNames(ids)) + '.') +
       (L.wizardNear(state.miles) ? ' While the Wizard is near, an unbroken week counts double.' : '') + '</p></div>';
     h += '' + section('Today’s march') + '';
@@ -175,7 +177,7 @@
         var s = D.STAGES[i], here = !done && i === idx, cls = here ? 'here' : (state.miles >= s.to ? 'walked' : 'ahead');
         h += '<div class="leg ' + cls + '">' + (here ? '<span class="you" role="img" aria-label="You are here"></span>' : '') +
           '<svg aria-hidden="true"><use href="#g-' + s.glyph + '"></use></svg><div><div>' + esc(s.road) + '</div>' +
-          '<div class="it">' + (here ? 'You are here, ' + fmt(L.r1(s.to - state.miles)) + ' miles from ' + esc(D.WAYPOINTS[i + 1].name) + ' · ' : fmt(s.to - s.from) + ' miles · ') + 'with ' + esc(s.as) + '</div></div></div>';
+          '<div class="it">' + (here ? 'You are here, ' + fmt(L.r1(s.to - state.miles)) + ' miles from ' + esc(D.WAYPOINTS[i + 1].name) + ' · ' : fmt(s.to - s.from) + ' miles · ') + 'with ' + esc(s.as) + ' ' + emblems(s.who, 'small') + '</div></div></div>';
       }
     });
     return h + '</div>';
@@ -190,7 +192,7 @@
       var p = D.PEOPLES[pid], b = L.bond(state, pid);
       var prev = (pid === 'wizard' ? D.WIZARD_RANKS : D.BOND_RANKS)[b.index].at;
       var pct = b.next ? Math.min(100, (b.points - prev) / (b.next.at - prev) * 100) : 100;
-      h += '<div class="bond"><div class="row"><div><div class="overline">' + esc(p.trait) + '</div><h3>' + esc(p.name) + '</h3></div><span class="tag plain">' + esc(b.rank) + '</span></div>' +
+      h += '<div class="bond"><div class="row"><div class="who">' + emblem(pid) + '<div><div class="overline">' + esc(p.trait) + '</div><h3>' + esc(p.name) + '</h3></div></div><span class="tag plain">' + esc(b.rank) + '</span></div>' +
         '<div class="meter" role="img" aria-label="' + Math.round(pct) + ' percent to the next rank"><i style="width:' + pct.toFixed(1) + '%"></i></div>' +
         '<p class="muted it" style="margin-top:6px">' + (b.next ? (pid === 'wizard' ? 'Best run of ' + b.points + (b.points === 1 ? ' unbroken week; ' : ' unbroken weeks; ') + esc(b.next.name) + ' at ' + b.next.at + '.' : b.points + (b.points === 1 ? ' bond point; ' : ' bond points; ') + esc(b.next.name) + ' at ' + b.next.at + '.') : 'The bond is complete.') + '</p>' +
         '<p style="margin-top:2px">' + (b.gifts.length ? 'Gifts: ' + esc(b.gifts.join(', ')) + '.' : '<span class="muted">No gifts yet.</span>') + '</p></div>';
@@ -262,7 +264,7 @@
   function chooseSheet(i) {
     var rows = D.EXERCISE_ORDER.map(function (id) {
       var e = EX[id], why = L.bonusFor(state, id, new Date());
-      return '<button class="btn wide" style="justify-content:space-between" data-act="choose" data-i="' + i + '" data-ex="' + id + '"><span>' + esc(e.name) + '</span>' +
+      return '<button class="btn wide" style="justify-content:space-between" data-act="choose" data-i="' + i + '" data-ex="' + id + '"><span class="who">' + emblem(e.people, 'small') + esc(e.name) + '</span>' +
         (why ? '<span class="tag">' + (why === 'company' ? '+½ company' : 'From afar') + '</span>' : '') + '</button>';
     }).join('');
     openSheet('<h2>' + (i === 'new' ? 'Add a block' : 'Swap this block') + '</h2><div class="stack" style="margin-top:14px">' + rows + '</div>' +

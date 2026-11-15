@@ -6,15 +6,15 @@
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
   var PEOPLES = {
-    hobbits: { name: 'Hobbits', trait: 'Endurance', ex: ['walk', 'plank'],
+    hobbits: { name: 'Hobbits', trait: 'Endurance', emblem: 'e-hobbits', ex: ['walk', 'plank'],
       gifts: ['A walking stick', 'A pouch of pipe-weed', 'A well-stocked pack', 'A seat by the fire'] },
-    elves: { name: 'Elves', trait: 'Grace', ex: ['pullup', 'band'],
+    elves: { name: 'Elves', trait: 'Grace', emblem: 'e-elves', ex: ['pullup', 'band'],
       gifts: ['A grey cloak', 'A coil of fine rope', 'A new bowstring', 'A leaf-shaped brooch'] },
-    dwarves: { name: 'Dwarves', trait: 'Strength', ex: ['pushup', 'swing'],
+    dwarves: { name: 'Dwarves', trait: 'Strength', emblem: 'e-dwarves', ex: ['pushup', 'swing'],
       gifts: ['A whetstone', 'Iron-shod boots', 'A shirt of mail', 'An axe from the Mountain'] },
-    men: { name: 'Men', trait: 'Vigor', ex: ['squat', 'jacks', 'jog'],
+    men: { name: 'Men', trait: 'Vigor', emblem: 'e-men', ex: ['squat', 'jacks', 'jog'],
       gifts: ['A hunting horn', 'A tall spear', 'A round shield', 'A banner of your own'] },
-    wizard: { name: 'The Wizard', trait: 'Constancy', ex: [],
+    wizard: { name: 'The Wizard', trait: 'Constancy', emblem: 'e-wizard', ex: [],
       gifts: ['A word of counsel', 'A box of fireworks', 'A staff of ash', 'A swift horse'] }
   };
   var TRAINING_PEOPLES = ['hobbits', 'elves', 'dwarves', 'men'];
