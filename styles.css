@@ -81,6 +81,14 @@ h1, h2, h3, p { margin: 0; font-weight: 400; }
 .endflo { display: flex; justify-content: center; margin-top: 14px; }
 .endflo .flo { width: 80px; height: 24px; }
 
+/* Stage scenes */
+.scene { margin: 6px 6px 16px; padding: 5px; border: 1px solid var(--ink); border-image: var(--rule-img-double) 14 / 14px / 6px stretch; background: var(--paper-light); color: var(--ink); }
+.scene svg { display: block; width: 100%; height: auto; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+.scene .far { stroke-width: 1; opacity: 0.8; }
+.scene .t { stroke-width: 0.8; }
+.scene .p { fill: var(--paper-light); }
+.scene .d { stroke-dasharray: 1 4; }
+
 /* Emblems of the peoples */
 .emb { width: 36px; height: 36px; flex-shrink: 0; color: var(--ink); }
 .emb.big { width: 46px; height: 46px; }

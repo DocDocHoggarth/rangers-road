@@ -12,6 +12,7 @@ It is a plain web app with no build step. It installs to a phone's home screen, 
 | `data.js` | The route, the peoples and the exercise ladders |
 | `logic.js` | The rules: sets, progression, miles, trials, weekly streaks |
 | `app.js` | The screens, storage and sync |
+| `scenes.js` | The stage scenes, one pen-and-ink landscape per stage |
 | `art.js` | The drawings, as inline SVG. `STYLE.md` describes the art direction. |
 | `tests/logic.test.js` | Tests for the rules. Run them with `node tests/logic.test.js`. |
 | `CLAUDE.md` | Working rules for anyone, or any assistant, changing the app |

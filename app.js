@@ -3,7 +3,7 @@
   'use strict';
   var D = self.RR_DATA, L = self.RR_LOGIC, EX = D.EXERCISES;
   var KEY = 'rangers-road-v1';
-  var VERSION = '1.0.4';
+  var VERSION = '1.0.5';
 
   var view = document.getElementById('view');
   var scrim = document.getElementById('scrim');
@@ -50,6 +50,12 @@
   function art(id, cls) { return '<svg' + (cls ? ' class="' + cls + '"' : '') + ' aria-hidden="true"><use href="#' + id + '"></use></svg>'; }
   function emblem(pid, size) { return art(D.PEOPLES[pid].emblem, 'emb' + (size ? ' ' + size : '')); }
   function emblems(who, size) { return who.map(function (p) { return emblem(p, size); }).join(''); }
+  /* A stage's pen-and-ink scene, or nothing if it has not been drawn yet. */
+  function scene(id) {
+    var sc = (self.RR_SCENES || {})[id];
+    if (!sc) return '';
+    return '<figure class="scene"><svg viewBox="0 0 358 150" role="img" aria-label="' + esc(sc.alt) + '"><g class="far">' + sc.far + '</g><g class="mid">' + sc.mid + '</g><g class="near">' + sc.near + '</g></svg></figure>';
+  }
   function flo(name) { return art('f-' + name, 'flo'); }
   function section(title) { return '<div class="section"><span>' + title + '</span>' + flo('diamonds') + '</div>'; }
   /* A paragraph's text with a decorated first letter. Screen readers get the plain text. */
@@ -76,7 +82,7 @@
   function head() {
     var idx = L.stageIndexAt(state.miles), st = D.STAGES[idx], nw = nextWaypoint();
     var pct = Math.min(100, state.miles / D.TOTAL_MILES * 100);
-    return '<header class="head">' +
+    return scene(st.scene) + '<header class="head">' +
       '<div class="overline">Stage ' + (idx + 1) + ' of ' + D.STAGES.length + ' · Book ' + ['One', 'Two', 'Three'][st.book - 1] + '</div>' +
       '<h1>' + esc(st.road) + '</h1>' +
       '<div class="miles"><b>' + fmt(state.miles) + '</b><span class="muted it">of ' + fmt(D.TOTAL_MILES) + ' miles · ' + esc(L.title(state.miles)) + '</span></div>' +

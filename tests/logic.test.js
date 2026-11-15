@@ -14,6 +14,7 @@ D.STAGES.forEach(function (s, i) {
   ok(s.from === (i ? D.STAGES[i - 1].to : 0), 'stage ' + (i + 1) + ' starts where the last one ended');
   ok(D.WAYPOINTS[i + 1].mile === s.to, 'a waypoint stands at the end of stage ' + (i + 1));
 });
+D.STAGES.forEach(function (s, i) { ok(typeof s.scene === 'string' && s.scene.length > 0, 'stage ' + (i + 1) + ' names its scene'); });
 ok(D.STAGES.length === 18 && D.STAGES[17].to === 2703 && D.TOTAL_MILES === 2703, '18 stages ending at 2,703 miles');
 ok(D.WAYPOINTS.length === 19 && D.WAYPOINTS.filter(function (w) { return w.great; }).length === 6, '19 waypoints, six great');
 

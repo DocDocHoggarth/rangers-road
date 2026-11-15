@@ -45,24 +45,24 @@
 
   /* who: the people in the company; as: how they appear in this stage. */
   var STAGES = [
-    { road: 'Hobbiton to Bree', from: 0, to: 135, who: ['hobbits'], as: 'Hobbits', glyph: 'hills', book: 1 },
-    { road: 'Bree to Weathertop', from: 135, to: 240, who: ['men'], as: 'Rangers', glyph: 'plain', book: 1 },
-    { road: 'Weathertop to Rivendell', from: 240, to: 458, who: ['elves'], as: 'Elves', glyph: 'woods', book: 1 },
-    { road: 'Rivendell to Hollin', from: 458, to: 660, who: ['men'], as: 'Gondor', glyph: 'hills', book: 1 },
-    { road: 'Hollin, Caradhras and the West-gate', from: 660, to: 815, who: ['dwarves'], as: 'Dwarves', glyph: 'peaks', book: 1 },
-    { road: 'Through Moria', from: 815, to: 855, who: ['dwarves', 'wizard'], as: 'Dwarves and the Wizard', glyph: 'cave', book: 1 },
-    { road: 'Dimrill Dale to Lothlórien', from: 855, to: 920, who: ['elves'], as: 'Elves', glyph: 'woods', book: 1 },
-    { road: 'The Great River to Sarn Gebir', from: 920, to: 1240, who: ['elves', 'hobbits'], as: 'Elves and Hobbits', glyph: 'river', book: 1 },
-    { road: 'Sarn Gebir to Parth Galen', from: 1240, to: 1309, who: ['men'], as: 'Gondor', glyph: 'river', book: 1 },
-    { road: 'The chase across Rohan to Fangorn', from: 1309, to: 1474, who: ['elves', 'dwarves'], as: 'Elves and Dwarves', glyph: 'plain', book: 2 },
-    { road: 'Fangorn to Edoras', from: 1474, to: 1604, who: ['wizard', 'men'], as: 'The Wizard and the Riders', glyph: 'woods', book: 2 },
-    { road: 'Edoras to Helm’s Deep', from: 1604, to: 1723, who: ['men', 'dwarves'], as: 'Riders and Dwarves', glyph: 'plain', book: 2 },
-    { road: 'Helm’s Deep to Isengard', from: 1723, to: 1779, who: ['hobbits'], as: 'Hobbits', glyph: 'tower', book: 2 },
-    { road: 'Isengard to Dunharrow', from: 1779, to: 2110, who: ['men', 'elves'], as: 'Rangers and Elves', glyph: 'peaks', book: 3 },
-    { road: 'The Paths of the Dead to Erech', from: 2110, to: 2160, who: ['dwarves'], as: 'Dwarves', glyph: 'cave', book: 3 },
-    { road: 'Erech to Pelargir', from: 2160, to: 2439, who: ['elves', 'dwarves'], as: 'Elves and Dwarves', glyph: 'hills', book: 3 },
-    { road: 'Pelargir to Minas Tirith', from: 2439, to: 2565, who: ['men'], as: 'Gondor', glyph: 'river', book: 3 },
-    { road: 'Minas Tirith to the Black Gate', from: 2565, to: 2703, who: ['hobbits', 'elves', 'dwarves', 'men', 'wizard'], as: 'All the free peoples', glyph: 'tower', book: 3 }
+    { road: 'Hobbiton to Bree', from: 0, to: 135, who: ['hobbits'], as: 'Hobbits', scene: 'shire', glyph: 'hills', book: 1 },
+    { road: 'Bree to Weathertop', from: 135, to: 240, who: ['men'], as: 'Rangers', scene: 'marsh', glyph: 'plain', book: 1 },
+    { road: 'Weathertop to Rivendell', from: 240, to: 458, who: ['elves'], as: 'Elves', scene: 'ford', glyph: 'woods', book: 1 },
+    { road: 'Rivendell to Hollin', from: 458, to: 660, who: ['men'], as: 'Gondor', scene: 'hollin', glyph: 'hills', book: 1 },
+    { road: 'Hollin, Caradhras and the West-gate', from: 660, to: 815, who: ['dwarves'], as: 'Dwarves', scene: 'pass', glyph: 'peaks', book: 1 },
+    { road: 'Through Moria', from: 815, to: 855, who: ['dwarves', 'wizard'], as: 'Dwarves and the Wizard', scene: 'mines', glyph: 'cave', book: 1 },
+    { road: 'Dimrill Dale to Lothlórien', from: 855, to: 920, who: ['elves'], as: 'Elves', scene: 'lake', glyph: 'woods', book: 1 },
+    { road: 'The Great River to Sarn Gebir', from: 920, to: 1240, who: ['elves', 'hobbits'], as: 'Elves and Hobbits', scene: 'river', glyph: 'river', book: 1 },
+    { road: 'Sarn Gebir to Parth Galen', from: 1240, to: 1309, who: ['men'], as: 'Gondor', scene: 'rapids', glyph: 'river', book: 1 },
+    { road: 'The chase across Rohan to Fangorn', from: 1309, to: 1474, who: ['elves', 'dwarves'], as: 'Elves and Dwarves', scene: 'plains', glyph: 'plain', book: 2 },
+    { road: 'Fangorn to Edoras', from: 1474, to: 1604, who: ['wizard', 'men'], as: 'The Wizard and the Riders', scene: 'forest', glyph: 'woods', book: 2 },
+    { road: 'Edoras to Helm’s Deep', from: 1604, to: 1723, who: ['men', 'dwarves'], as: 'Riders and Dwarves', scene: 'gorge', glyph: 'plain', book: 2 },
+    { road: 'Helm’s Deep to Isengard', from: 1723, to: 1779, who: ['hobbits'], as: 'Hobbits', scene: 'ringwall', glyph: 'tower', book: 2 },
+    { road: 'Isengard to Dunharrow', from: 1779, to: 2110, who: ['men', 'elves'], as: 'Rangers and Elves', scene: 'stair', glyph: 'peaks', book: 3 },
+    { road: 'The Paths of the Dead to Erech', from: 2110, to: 2160, who: ['dwarves'], as: 'Dwarves', scene: 'door', glyph: 'cave', book: 3 },
+    { road: 'Erech to Pelargir', from: 2160, to: 2439, who: ['elves', 'dwarves'], as: 'Elves and Dwarves', scene: 'descent', glyph: 'hills', book: 3 },
+    { road: 'Pelargir to Minas Tirith', from: 2439, to: 2565, who: ['men'], as: 'Gondor', scene: 'fleet', glyph: 'river', book: 3 },
+    { road: 'Minas Tirith to the Black Gate', from: 2565, to: 2703, who: ['hobbits', 'elves', 'dwarves', 'men', 'wizard'], as: 'All the free peoples', scene: 'gate', glyph: 'tower', book: 3 }
   ];
   var TOTAL_MILES = 2703;
 
