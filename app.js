@@ -3,7 +3,7 @@
   'use strict';
   var D = self.RR_DATA, L = self.RR_LOGIC, EX = D.EXERCISES;
   var KEY = 'rangers-road-v1';
-  var VERSION = '1.0.7';
+  var VERSION = '1.0.8';
 
   var view = document.getElementById('view');
   var scrim = document.getElementById('scrim');
@@ -13,7 +13,7 @@
   var state = load();
   var tab = 'today';
   var timers = {};
-  var syncTimer = null, toastTimer = null, syncBusy = false, roadEnter = false;
+  var syncTimer = null, toastTimer = null, syncBusy = false, roadEnter = false, lastFocus = null;
 
   /* ---------- storage ---------- */
   function load() {
@@ -62,6 +62,11 @@
     if (!sc) return '';
     return '<svg class="art strip' + (pencil ? ' pencil' : '') + '" viewBox="0 44 358 76" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g class="far">' + sc.far + '</g><g class="mid">' + sc.mid + '</g></svg>';
   }
+  /* A red wax seal pressed with a people's emblem. */
+  function seal(pid) {
+    return '<span class="seal" aria-hidden="true"><svg viewBox="0 0 72 72"><path class="wax" d="M36 5c8-2 15 2 20 7 7 3 11 10 11 18 3 8 0 16-6 22-3 7-10 12-18 12-8 3-16 1-22-5-7-3-12-10-12-18-3-8-1-16 5-22 3-7 10-12 18-12 1-1 3-2 4-2z"/><circle cx="36" cy="36" r="22"/></svg>' + emblem(pid) + '</span>';
+  }
+  function company(as) { return as.replace(/^(The|All) /, function (m) { return m.toLowerCase(); }); }
   function flo(name) { return art('f-' + name, 'flo'); }
   function section(title) { return '<div class="section"><span>' + title + '</span>' + flo('diamonds') + '</div>'; }
   /* A paragraph's text with a decorated first letter. Screen readers get the plain text. */
@@ -73,8 +78,18 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { toastEl.hidden = true; }, 4200);
   }
-  function openSheet(html) { sheet.innerHTML = html; scrim.hidden = false; sheet.scrollTop = 0; }
-  function closeSheet() { scrim.hidden = true; sheet.innerHTML = ''; }
+  /* Sheets are dialogs: focus moves into them and goes back where it was when they close. */
+  function openSheet(html, mode) {
+    if (scrim.hidden) lastFocus = document.activeElement;
+    sheet.className = scrim.className = mode || '';
+    sheet.innerHTML = html; scrim.hidden = false; sheet.scrollTop = 0;
+    try { sheet.focus({ preventScroll: true }); } catch (e) { /* older browsers */ }
+  }
+  function closeSheet() {
+    scrim.hidden = true; sheet.innerHTML = '';
+    if (lastFocus && document.contains(lastFocus) && lastFocus.focus) lastFocus.focus();
+    lastFocus = null;
+  }
   function nextWaypoint() {
     for (var i = 0; i < D.WAYPOINTS.length; i++) if (D.WAYPOINTS[i].mile > state.miles) return D.WAYPOINTS[i];
     return null;
@@ -195,7 +210,7 @@
         var delay = from < to ? ';transition-delay:' + (Math.min(moving++, 4) * 0.25).toFixed(2) + 's' : '';
         h += '<div class="leg ' + (here ? 'here' : (walked ? 'walked' : 'ahead')) + '">' + (here ? '<span class="you" role="img" aria-label="You are here"></span>' : '') +
           '<div class="legtext"><div>' + esc(s.road) + '</div>' +
-          '<div class="it">' + (here ? 'You are here, ' + fmt(L.r1(s.to - state.miles)) + ' miles from ' + esc(D.WAYPOINTS[i + 1].name) + ' · ' : fmt(span) + ' miles · ') + 'with ' + esc(s.as) + ' ' + emblems(s.who, 'small') + '</div></div>' +
+          '<div class="it">' + (here ? 'You are here, ' + fmt(L.r1(s.to - state.miles)) + ' miles from ' + esc(D.WAYPOINTS[i + 1].name) + ' · ' : fmt(span) + ' miles · ') + 'with ' + esc(company(s.as)) + ' ' + emblems(s.who, 'small') + '</div></div>' +
           '<div class="stripbox" role="img" aria-label="' + esc(sc ? sc.alt : s.road) + '">' + strip(s.scene, true) +
           (to > 0 ? '<div class="inked" data-to="' + to.toFixed(1) + '" style="clip-path:inset(0 ' + (100 - from).toFixed(1) + '% 0 0)' + delay + '">' + strip(s.scene, false) + '</div>' +
             (here ? '<i class="mark" data-to="' + to.toFixed(1) + '" style="left:' + from.toFixed(1) + '%' + delay + '"></i>' : '') : '') +
@@ -276,12 +291,18 @@
       '<div class="btns"><button class="btn primary" data-act="trialsave" data-wi="' + wi + '">Record the trial</button><button class="btn quiet" data-act="close">Not now</button></div>' +
       '<button class="link" data-act="trialskip" data-wi="' + wi + '">Skip this trial altogether</button>');
   }
+  /* The page for a waypoint: the scene of the stage that led here, its tale, and a seal for the company ahead.
+     It opens with motion on arrival, and without it when a reached waypoint is tapped on the Road page. */
   function taleSheet(wi, arrived) {
-    var w = D.WAYPOINTS[wi];
-    openSheet('<div class="overline">' + (arrived ? 'You have reached' : 'Mile ' + fmt(w.mile)) + '</div><h2>' + esc(w.name) + '</h2>' +
-      '<p class="tale">' + initialed(w.tale) + '</p><div class="endflo">' + flo('sprig') + '</div>' +
-      (arrived && state.trialsPending.indexOf(wi) !== -1 ? '<p class="muted it" style="margin-top:12px">A trial awaits you on the Today page.</p>' : '') +
-      '<div class="btns"><button class="btn primary" data-act="close">Onward</button></div>');
+    var w = D.WAYPOINTS[wi], next = D.STAGES[wi] || null, prev = D.STAGES[Math.max(0, wi - 1)];
+    var pending = state.trialsPending.indexOf(wi) !== -1;
+    openSheet('<div class="arrival' + (w.great ? ' great' : '') + (arrived ? '' : ' still') + '">' + scene(prev.scene) +
+      '<div class="overline">' + (arrived ? 'You have reached' : 'Mile ' + fmt(w.mile)) + '</div><h2>' + esc(w.name) + '</h2>' +
+      '<p class="tale">' + initialed(w.tale) + '</p>' +
+      '<div class="sealrow">' + seal(next ? next.who[0] : 'men') + '<p class="muted it">' +
+      (next ? 'Next: ' + esc(next.road) + ', with ' + esc(company(next.as)) + '.' : 'The road is walked.') +
+      (pending ? ' ' + (w.great ? 'A great trial awaits.' : 'A trial awaits.') : '') + '</p></div>' +
+      '<div class="btns"><button class="btn primary" data-act="close">Onward</button></div></div>', arrived ? 'full' : 'full still');
   }
   function chooseSheet(i) {
     var rows = D.EXERCISE_ORDER.map(function (id) {
