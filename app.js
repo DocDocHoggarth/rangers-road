@@ -3,7 +3,7 @@
   'use strict';
   var D = self.RR_DATA, L = self.RR_LOGIC, EX = D.EXERCISES;
   var KEY = 'rangers-road-v1';
-  var VERSION = '1.0.2';
+  var VERSION = '1.0.3';
 
   var view = document.getElementById('view');
   var scrim = document.getElementById('scrim');
@@ -47,6 +47,13 @@
   }
   function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigits: 1 }); }
   function half(n) { return n === 0.5 ? '½' : fmt(n); }
+  function art(id, cls) { return '<svg' + (cls ? ' class="' + cls + '"' : '') + ' aria-hidden="true"><use href="#' + id + '"></use></svg>'; }
+  function flo(name) { return art('f-' + name, 'flo'); }
+  function section(title) { return '<div class="section"><span>' + title + '</span>' + flo('diamonds') + '</div>'; }
+  /* A paragraph's text with a decorated first letter. Screen readers get the plain text. */
+  function initialed(text) {
+    return '<span aria-hidden="true"><span class="initial">' + art('f-scroll') + '<b>' + esc(text.charAt(0)) + '</b></span>' + esc(text.slice(1)) + '</span><span class="sr">' + esc(text) + '</span>';
+  }
   function toast(msg) {
     toastEl.textContent = msg; toastEl.hidden = false;
     clearTimeout(toastTimer);
@@ -88,7 +95,7 @@
       '<div class="sub">Hobbiton to the Black Gate, ' + fmt(D.TOTAL_MILES) + ' miles, walked one workout at a time.</div></header>' +
       installNote() +
       '<div class="card double"><h2>Your first trials</h2>' +
-      '<p class="muted" style="margin-top:6px">After a warm-up, do one all-out set of each with clean form. Your daily sets are built from these numbers. Leave any blank to start on the lowest rung; you can record it later on the Ranger page.</p>' +
+      '<p class="muted" style="margin-top:6px">' + initialed('After a warm-up, do one all-out set of each with clean form. Your daily sets are built from these numbers. Leave any blank to start on the lowest rung; you can record it later on the Ranger page.') + '</p>' +
       '<div class="stack" style="margin-top:14px">' + rows + '</div>' +
       '<div class="btns"><button class="btn primary" data-act="muster">Begin the road</button></div></div>';
   }
@@ -104,7 +111,7 @@
     var h = '<article class="card' + (it.done || it.missed ? ' done' : '') + '">' +
       '<div class="row top"><div><div class="overline">' + esc(people.name) + ' · ' + esc(people.trait) + '</div><h3>' + esc(e.name) + '</h3></div>' + tag + '</div>' +
       '<p class="muted">' + esc(p.rung.n) + (p.rung.d ? ' · ' + esc(p.rung.d) : '') + '</p>';
-    if (it.done) return h + '<p class="it" style="margin-top:6px">Done · ' + esc(it.note || '') + ' +' + fmt(it.earned) + ' miles</p></article>';
+    if (it.done) return h + '<p class="hand" style="margin-top:6px">Done · ' + esc(it.note || '') + ' +' + fmt(it.earned) + ' miles</p></article>';
     if (it.missed) return h + '<p class="it muted" style="margin-top:6px">Fell short today. No miles lost.</p></article>';
     h += '<p class="rx">' + esc(p.text) + '</p>';
     if (it.ex === 'walk') {
@@ -144,7 +151,7 @@
     h += '<div class="card"><div class="overline">Your company</div><h3>' + esc(st.as) + '</h3>' +
       '<p class="muted" style="margin-top:4px">' + (who.length >= 4 ? 'Every exercise earns the extra half mile.' : 'Their exercises earn an extra half mile: ' + esc(exNames(ids)) + '.') +
       (L.wizardNear(state.miles) ? ' While the Wizard is near, an unbroken week counts double.' : '') + '</p></div>';
-    h += '<div class="section">Today’s march</div>';
+    h += '' + section('Today’s march') + '';
     plan.items.forEach(function (it, i) { h += blockCard(it, i); });
     h += '<div class="btns"><button class="btn" data-act="add">Add another block</button></div>';
     var days = L.sessionDays(state, L.weekKey(now));
@@ -160,7 +167,7 @@
     D.WAYPOINTS.forEach(function (w, i) {
       var reached = state.miles >= w.mile;
       if (i < D.STAGES.length && (i === 0 || D.STAGES[i].book !== D.STAGES[i - 1].book)) {
-        h += '<div class="book">Book ' + ['One', 'Two', 'Three'][D.STAGES[i].book - 1] + '</div>';
+        h += '<div class="book"><span>Book ' + ['One', 'Two', 'Three'][D.STAGES[i].book - 1] + '</span>' + flo('knot') + '</div>';
       }
       h += '<div class="wp ' + (reached ? 'reached' : 'unreached') + (w.great ? ' great' : '') + '"><span class="dot"></span>' +
         '<button data-act="tale" data-wi="' + i + '"' + (reached ? '' : ' disabled') + '><span class="name">' + esc(w.name) + '</span><span class="mile">mile ' + fmt(w.mile) + '</span></button></div>';
@@ -178,7 +185,7 @@
   function vRanger() {
     var h = '<header class="head"><div class="overline">Your Ranger</div><h1>' + esc(L.title(state.miles)) + '</h1>' +
       '<div class="sub">' + fmt(state.miles) + ' miles walked · ' + state.weeks.streak + ' unbroken ' + (state.weeks.streak === 1 ? 'week' : 'weeks') + ' running, best ' + state.weeks.best + '</div></header>';
-    h += '<div class="section">Bonds</div><div class="card">';
+    h += '' + section('Bonds') + '<div class="card">';
     ['hobbits', 'elves', 'dwarves', 'men', 'wizard'].forEach(function (pid) {
       var p = D.PEOPLES[pid], b = L.bond(state, pid);
       var prev = (pid === 'wizard' ? D.WIZARD_RANKS : D.BOND_RANKS)[b.index].at;
@@ -188,7 +195,7 @@
         '<p class="muted it" style="margin-top:6px">' + (b.next ? (pid === 'wizard' ? 'Best run of ' + b.points + (b.points === 1 ? ' unbroken week; ' : ' unbroken weeks; ') + esc(b.next.name) + ' at ' + b.next.at + '.' : b.points + (b.points === 1 ? ' bond point; ' : ' bond points; ') + esc(b.next.name) + ' at ' + b.next.at + '.') : 'The bond is complete.') + '</p>' +
         '<p style="margin-top:2px">' + (b.gifts.length ? 'Gifts: ' + esc(b.gifts.join(', ')) + '.' : '<span class="muted">No gifts yet.</span>') + '</p></div>';
     });
-    h += '</div><div class="section">Training</div><div class="card">';
+    h += '</div>' + section('Training') + '<div class="card">';
     D.EXERCISE_ORDER.forEach(function (id) {
       var e = EX[id], s = state.ex[id], p = L.rx(state, id);
       h += '<div class="exrow"><div class="row"><div><h3>' + esc(e.name) + '</h3><p class="muted">Rung ' + (s.rung + 1) + ' of ' + e.rungs.length + ' · ' + esc(p.rung.n) + '</p></div>' +
@@ -206,15 +213,15 @@
     var h = '<header class="head"><div class="overline">Journal</div><h1>Records and backup</h1>' +
       '<div class="sub">' + L.sessionDays(state, L.weekKey(now)) + ' of ' + s.perWeek + ' full marches this week</div></header>';
     h += '<div class="card"><label class="field">An unbroken week needs<select id="perweek">' + opts + '</select></label></div>';
-    h += '<div class="section">Google Sheet</div><div class="card"><p class="muted">Paste the web app address and passphrase from your Sheet’s script. The app then copies every entry to the Sheet whenever you are online.</p>' +
+    h += '' + section('Google Sheet') + '<div class="card"><p class="muted">Paste the web app address and passphrase from your Sheet’s script. The app then copies every entry to the Sheet whenever you are online.</p>' +
       '<div class="stack" style="margin-top:10px"><label class="field">Web app address<input type="url" id="syncurl" autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(s.syncUrl) + '" placeholder="https://script.google.com/macros/s/…/exec"></label>' +
       '<label class="field">Passphrase<input type="password" id="synckey" autocomplete="off" value="' + esc(s.syncKey) + '"></label></div>' +
       '<p class="muted it" style="margin-top:8px" id="syncstatus">' + esc(syncStatus()) + '</p>' +
       '<div class="btns"><button class="btn primary" data-act="sync">Save and sync</button><button class="btn" data-act="restore">Restore</button></div></div>';
-    h += '<div class="section">Backup file</div><div class="card"><p class="muted">A file copy of everything, kept wherever you save it.</p>' +
+    h += '' + section('Backup file') + '<div class="card"><p class="muted">A file copy of everything, kept wherever you save it.</p>' +
       '<div class="btns"><button class="btn" data-act="export">Save a file</button><button class="btn" data-act="import">Load a file</button></div>' +
       '<input type="file" id="importfile" accept=".json,application/json" hidden></div>';
-    h += '<div class="section">Recent entries</div><div class="card log"><ul>';
+    h += '' + section('Recent entries') + '<div class="card log"><ul>';
     var recent = state.log.slice(-30).reverse();
     if (!recent.length) h += '<li><span class="muted">Nothing yet.</span></li>';
     recent.forEach(function (l) {
@@ -248,7 +255,7 @@
   function taleSheet(wi, arrived) {
     var w = D.WAYPOINTS[wi];
     openSheet('<div class="overline">' + (arrived ? 'You have reached' : 'Mile ' + fmt(w.mile)) + '</div><h2>' + esc(w.name) + '</h2>' +
-      '<p class="tale">' + esc(w.tale) + '</p>' +
+      '<p class="tale">' + initialed(w.tale) + '</p><div class="endflo">' + flo('sprig') + '</div>' +
       (arrived && state.trialsPending.indexOf(wi) !== -1 ? '<p class="muted it" style="margin-top:12px">A trial awaits you on the Today page.</p>' : '') +
       '<div class="btns"><button class="btn primary" data-act="close">Onward</button></div>');
   }
