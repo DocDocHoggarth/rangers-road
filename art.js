@@ -25,7 +25,17 @@
     '<symbol id="e-wizard" viewBox="0 0 48 48"><path d="M17 45L24.5 15c1-5 7-5.5 7.5-1 .3 2.5-2.5 3.5-3.5 2M31 1.5l1.5 3.5L36 6.5 32.5 8 31 11.5 29.5 8 26 6.5l3.5-1.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 29l3 1.5M19.3 36l2.7 1.3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></symbol>'
   ];
 
+  /* Hatching for the scenes: h1 light, h2 dense, h3 cross-hatch, hh water, hv vertical, hd stipple. */
+  var PATTERNS = [
+    '<pattern id="h1" width="24" height="12.6" patternUnits="userSpaceOnUse" patternTransform="rotate(-56)"><path d="M0 2h24M0 6.2h9M12 6.2h12M0 10.4h17M20 10.4h4" fill="none" stroke="currentColor" stroke-width=".7" stroke-linecap="round"/></pattern>',
+    '<pattern id="h2" width="24" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-56)"><path d="M0 1.2h24M0 3.7h13M16 3.7h8M0 6.2h24M0 8.7h5M8 8.7h16" fill="none" stroke="currentColor" stroke-width=".7" stroke-linecap="round"/></pattern>',
+    '<pattern id="h3" width="24" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-56)"><path d="M0 1.2h24M0 3.7h13M16 3.7h8M0 6.2h24M0 8.7h5M8 8.7h16M3 0v10M9 0v10M15 0v4M15 6v4M21 0v10" fill="none" stroke="currentColor" stroke-width=".7" stroke-linecap="round"/></pattern>',
+    '<pattern id="hh" width="40" height="9" patternUnits="userSpaceOnUse"><path d="M0 2.2h13M17 2.2h7M29 2.2h11M5 6.7h11M21 6.7h14" fill="none" stroke="currentColor" stroke-width=".7" stroke-linecap="round"/></pattern>',
+    '<pattern id="hv" width="10" height="30" patternUnits="userSpaceOnUse"><path d="M1.5 0v30M5 0v12M5 16v14M8.5 0v22M8.5 26v4" fill="none" stroke="currentColor" stroke-width=".7" stroke-linecap="round"/></pattern>',
+    '<pattern id="hd" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M2 3h.1M8 1.5h.1M11.5 7h.1M5 8.5h.1M1.5 12h.1M9 12.5h.1" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></pattern>'
+  ];
+
   var holder = document.createElement('div');
-  holder.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true"><defs>' + SYMBOLS.join('') + '</defs></svg>';
+  holder.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;color:var(--ink)" aria-hidden="true"><defs>' + SYMBOLS.join('') + PATTERNS.join('') + '</defs></svg>';
   document.body.insertBefore(holder.firstChild, document.body.firstChild);
 })();

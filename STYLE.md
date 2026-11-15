@@ -16,8 +16,16 @@ Every drawing in the app follows these rules, so the work of different sessions 
 
 ## Shading
 
-- Short parallel hatch strokes on the side away from the light.
-- Light comes from the upper left.
+- Hatching goes on the side away from the light. Light comes from the upper left.
+- Scenes are shaded richly: most landforms carry at least one area of hatching, and the darkest things (deep forest, doorways, storm cloud) are cross-hatched.
+- Hatching is drawn with the six patterns in `art.js`: `h1` light, `h2` dense, `h3` cross-hatch, `hh` broken horizontal lines for water, `hv` vertical lines for walls and cliffs, `hd` stipple for mist and far tone.
+- Leave a thin rim of bare paper between an outline and its hatching.
+
+## How a scene is built
+
+- A scene has three layers: far, middle and near.
+- It is painted back to front. Each landform first hides what is behind it with the paper colour, then takes its hatching, then its outline.
+- `scenes.js` has small helpers for repeated things (pines, round trees, rocks, standing stones, clouds, boats), so a scene is mostly a list of landforms and objects.
 
 ## Conventions
 

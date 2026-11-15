@@ -88,6 +88,8 @@ h1, h2, h3, p { margin: 0; font-weight: 400; }
 .scene .t { stroke-width: 0.8; }
 .scene .p { fill: var(--paper-light); }
 .scene .d { stroke-dasharray: 1 4; }
+.scene .k { stroke-width: 2.4; }
+.scene .w { stroke: var(--paper-light); stroke-width: 5.5; }
 
 /* Emblems of the peoples */
 .emb { width: 36px; height: 36px; flex-shrink: 0; color: var(--ink); }
