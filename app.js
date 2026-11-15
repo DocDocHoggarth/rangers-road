@@ -3,7 +3,7 @@
   'use strict';
   var D = self.RR_DATA, L = self.RR_LOGIC, EX = D.EXERCISES;
   var KEY = 'rangers-road-v1';
-  var VERSION = '1.0.1';
+  var VERSION = '1.0.2';
 
   var view = document.getElementById('view');
   var scrim = document.getElementById('scrim');
