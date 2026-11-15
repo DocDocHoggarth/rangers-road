@@ -1,7 +1,7 @@
 /* Offline support: keep a copy of the app on the phone and refresh it quietly when online. */
-var CACHE = 'rangers-road-1.0.0';
+var CACHE = 'rangers-road-1.0.1';
 var SHELL = [
-  './', 'index.html', 'styles.css', 'data.js', 'logic.js', 'app.js', 'manifest.webmanifest',
+  './', 'index.html', 'styles.css', 'data.js', 'logic.js', 'app.js', 'art.js', 'manifest.webmanifest',
   'fell.woff2', 'fell-italic.woff2', 'fell-sc.woff2',
   'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'
 ];
