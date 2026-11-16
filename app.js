@@ -3,7 +3,7 @@
   'use strict';
   var D = self.RR_DATA, L = self.RR_LOGIC, EX = D.EXERCISES;
   var KEY = 'rangers-road-v1';
-  var VERSION = '1.1.1';
+  var VERSION = '1.2.0';
 
   var view = document.getElementById('view');
   var scrim = document.getElementById('scrim');
@@ -202,6 +202,13 @@
         '<p class="muted" style="margin-top:4px">' + esc(w.trial) + ' Retest ' + esc(exNames(L.trialExercises(wi))) + '. A new best is worth ' + D.RULES.prMiles + ' miles.</p>' +
         '<div class="btns"><button class="btn primary" data-act="trial" data-wi="' + wi + '">Begin the trial</button></div></div>';
     });
+    var unread = firstUnread();
+    if (unread !== null) {
+      var uw = D.WAYPOINTS[unread];
+      h += '<div class="card"><div class="row top"><div><div class="overline">' + (unread === 0 ? 'The chronicle begins' : 'A new chapter') + '</div><h3>' + esc(chapterOf(unread).title) + '</h3>' +
+        '<p class="muted it">Chapter ' + (unread + 1) + ' · ' + esc(uw.name) + '</p></div></div>' +
+        '<div class="btns"><button class="btn" data-act="chapter" data-wi="' + unread + '">Read it</button></div></div>';
+    }
     var who = st.who.filter(function (p) { return p !== 'wizard'; }), ids = [];
     who.forEach(function (p) { ids = ids.concat(D.PEOPLES[p].ex); });
     h += '<div class="card"><div class="row top"><div><div class="overline">Your company</div><h3>' + esc(st.as) + '</h3></div><div class="embs">' + emblems(st.who, st.who.length > 2 ? '' : 'big') + '</div></div>' +
@@ -228,7 +235,7 @@
         h += '<div class="book"><span>Book ' + ['One', 'Two', 'Three'][D.STAGES[i].book - 1] + '</span>' + flo('knot') + '</div>';
       }
       h += '<div class="wp ' + (reached ? 'reached' : 'unreached') + (w.great ? ' great' : '') + '"><span class="dot"></span>' +
-        '<button data-act="tale" data-wi="' + i + '"' + (reached ? '' : ' disabled') + '><span class="name">' + esc(w.name) + '</span><span class="mile">mile ' + fmt(w.mile) + '</span></button></div>';
+        '<button data-act="tale" data-wi="' + i + '"' + (reached ? '' : ' disabled') + '><span class="name">' + esc(w.name) + (reached && chapterOf(i) && !(state.read || {})[i] ? '<span class="newtag">New chapter</span>' : '') + '</span><span class="mile">mile ' + fmt(w.mile) + '</span></button></div>';
       if (i < D.STAGES.length) {
         var s = D.STAGES[i], here = !done && i === idx, walked = state.miles >= s.to, span = s.to - s.from;
         var to = walked ? 100 : (here ? (state.miles - s.from) / span * 100 : 0);
@@ -342,7 +349,41 @@
       '<div class="sealrow">' + seal(next ? next.who[0] : 'men') + '<p class="muted it">' +
       (next ? 'Next: ' + esc(next.road) + ', with ' + esc(company(next.as)) + '.' : 'The road is walked.') +
       (pending ? ' ' + (w.great ? 'A great trial awaits.' : 'A trial awaits.') : '') + '</p></div>' +
-      '<div class="btns"><button class="btn primary" data-act="close">Onward</button></div></div>', arrived ? 'full' : 'full still');
+      '<div class="btns">' + (chapterOf(wi) ? '<button class="btn primary" data-act="chapter" data-wi="' + wi + '">Read the chapter</button><button class="btn quiet" data-act="close">Onward</button>' : '<button class="btn primary" data-act="close">Onward</button>') + '</div></div>', arrived ? 'full' : 'full still');
+  }
+  /* ---------- the chronicle ---------- */
+  function chapterOf(wi) { return (self.RR_CHAPTERS || [])[wi] || null; }
+  function unlocked() {
+    var out = [];
+    for (var i = 0; i < D.WAYPOINTS.length; i++) if (state.tales[i] && chapterOf(i)) out.push(i);
+    return out;
+  }
+  function firstUnread() {
+    var open = unlocked(), read = state.read || {};
+    for (var i = 0; i < open.length; i++) if (!read[open[i]]) return open[i];
+    return null;
+  }
+  /* A chapter: the scene of the stage that led here, the passage, the Ranger's notes and the road ahead.
+     Opening it marks it read. Previous and next move among the chapters already unlocked. */
+  function chapterSheet(wi) {
+    var ch = chapterOf(wi);
+    if (!ch || !state.tales[wi]) return;
+    var w = D.WAYPOINTS[wi], led = D.STAGES[Math.max(0, wi - 1)], ahead = D.STAGES[wi] || null;
+    var open = unlocked(), at = open.indexOf(wi), prev = at > 0 ? open[at - 1] : null, next = at < open.length - 1 ? open[at + 1] : null;
+    if (!state.read) state.read = {};
+    if (!state.read[wi]) { state.read[wi] = true; save(); render(); }
+    var body = ch.text.map(function (t, i) { return '<p class="body">' + (i ? esc(t) : initialed(t)) + '</p>'; }).join('');
+    openSheet('<article class="arrival chapter still">' + scene(led.scene) +
+      '<div class="overline">Chapter ' + (wi + 1) + ' of ' + D.WAYPOINTS.length + ' · ' + esc(w.name) + '</div>' +
+      '<h2>' + esc(ch.title) + '</h2>' + body +
+      '<div class="endflo">' + flo('sprig') + '</div>' +
+      '<aside class="notes"><div class="overline">From the Ranger’s notes</div><p>' + esc(ch.notes) + '</p></aside>' +
+      '<div class="ahead"><div class="row top"><div><div class="overline">The road ahead</div><p>' + esc(ch.lesson) + '</p></div>' +
+      (ahead ? '<div class="embs">' + emblems(ahead.who, ahead.who.length > 2 ? 'small' : '') + '</div>' : '') + '</div></div>' +
+      '<nav class="btns" aria-label="Chapters">' +
+      (prev !== null ? '<button class="btn quiet" data-act="chapter" data-wi="' + prev + '">Previous</button>' : '') +
+      (next !== null ? '<button class="btn" data-act="chapter" data-wi="' + next + '">Next chapter</button>' : '') + '</nav>' +
+      '<div class="btns"><button class="btn primary" data-act="close">Close</button></div></article>', 'full still');
   }
   function giftSheet(pid, gi) {
     var p = D.PEOPLES[pid], g = p.gifts[gi], ranks = pid === 'wizard' ? D.WIZARD_RANKS : D.BOND_RANKS;
@@ -448,6 +489,7 @@
     },
     trialskip: function (el) { L.finishTrial(state, +el.dataset.wi); save(); closeSheet(); render(); },
     tale: function (el) { taleSheet(+el.dataset.wi, false); },
+    chapter: function (el) { chapterSheet(+el.dataset.wi); },
     gift: function (el) { giftSheet(el.dataset.p, +el.dataset.g); },
     adjust: function (el) { adjustSheet(el.dataset.ex); },
     adjsave: function (el) {

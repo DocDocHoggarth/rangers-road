@@ -259,6 +259,15 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .arrival .art .near { animation: fade 0.45s 0.75s both; }
 .arrival .seal { animation: stamp 0.45s 1s both; }
 .arrival.still .art g, .arrival.still .seal { animation: none; }
+/* The chronicle */
+.chapter h2 { margin-bottom: 2px; }
+.chapter .body { font-size: 19px; line-height: 1.55; margin-top: 12px; }
+.notes { margin-top: 20px; padding: 14px 16px; border: 1px solid var(--ink); border-image: var(--rule-img) 12 / 12px / 6px stretch; background: var(--card); }
+.notes p { font-family: var(--hand); font-size: 21px; line-height: 1.35; margin-top: 6px; }
+.ahead { margin-top: 18px; }
+.ahead p { margin-top: 4px; }
+.chapter nav.btns:empty { display: none; }
+.newtag { display: block; font-family: var(--caps); font-style: normal; font-size: 12px; letter-spacing: 0.1em; color: var(--red); }
 #toast { position: fixed; left: 16px; right: 16px; bottom: calc(env(safe-area-inset-bottom) + 76px); margin: 0 auto; max-width: 528px; background: var(--ink); color: var(--on-ink); padding: 12px 16px; border-radius: 3px; z-index: 20; font-size: 16px; text-align: center; }
 #toast[hidden] { display: none; }
 #toast { animation: toastin 0.25s ease-out; }

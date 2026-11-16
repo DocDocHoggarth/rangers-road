@@ -18,6 +18,7 @@ The whole app is about 470 KB and works offline once it has been opened.
 | `data.js` | The route, the peoples and the exercise ladders |
 | `logic.js` | The rules: sets, progression, miles, trials, weekly streaks |
 | `app.js` | The screens, storage and sync |
+| `tales.js` | The chronicle: a chapter for each waypoint, with the Ranger’s notes on the history of the place |
 | `scenes.js` | The stage scenes, one pen-and-ink landscape per stage. The Road page shows a strip of each, in ink once walked and in pencil ahead, and reaching a waypoint opens a full page with the scene, the tale and a wax seal. |
 | `art.js` | The smaller drawings as inline SVG: emblems, gifts, flourishes and the hatching patterns. `STYLE.md` describes the art direction. |
 | `tests/logic.test.js` | Tests for the rules. Run them with `node tests/logic.test.js`. |

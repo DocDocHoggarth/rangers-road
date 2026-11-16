@@ -113,4 +113,15 @@ D.EXERCISE_ORDER.forEach(function (id) {
   }
 });
 
+/* The chronicle */
+global.self = global;
+require('../tales.js');
+var CH = global.RR_CHAPTERS;
+ok(CH.length === D.WAYPOINTS.length, 'one chapter for each waypoint');
+CH.forEach(function (c, i) {
+  ok(c.title && c.text.length >= 4 && c.notes && c.lesson, 'chapter ' + (i + 1) + ' has a title, at least four paragraphs, notes and a lesson');
+  ok(c.text.every(function (t) { return t.length > 10 && t.indexOf('<') === -1; }), 'chapter ' + (i + 1) + ' paragraphs are prose');
+});
+ok(JSON.stringify(L.newState(MON).read) === '{}', 'a new Ranger has read nothing');
+
 console.log('all ' + count + ' checks passed');
