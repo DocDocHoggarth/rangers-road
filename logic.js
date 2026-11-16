@@ -73,7 +73,7 @@
     var s = state.ex[exId], r = EX[exId].rungs[s.rung], v = s.value, sets = r.sets, text;
     if (r.unit === 'reps' && r.sets === 3 && v < 5) sets = 5;
     if (r.bow) {
-      text = sets + ' rounds: ' + v + ' pull-aparts, ' + Math.round(0.75 * v) + ' rows, ' + Math.round(0.6 * v) + ' archer draws per side';
+      text = sets + ' rounds: ' + v + ' pull-aparts, ' + Math.round(0.75 * v) + ' rows with handles, ' + Math.round(0.6 * v) + ' archer draws per side';
     } else if (r.per) {
       text = v + ' minutes, ' + r.per + ' swings each minute (' + (v * r.per) + ' swings)';
     } else if (exId === 'walk') {

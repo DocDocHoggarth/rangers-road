@@ -170,13 +170,20 @@
     },
     band: {
       name: 'Band work', people: 'elves',
-      trial: 'Most pull-aparts with your lightest band', trialUnit: 'reps',
+      trial: 'Most pull-aparts with a light band', trialUnit: 'reps',
+      /* Light, medium and heavy mean whatever those are in your own set of bands. Rows use handles. */
       rungs: [
-        rung({ n: 'Bow drills, lightest band', d: 'Pull-aparts, rows and archer draws', start: 12, top: 20, rest: 60, bow: true }),
-        rung({ n: 'Bow drills with a pause', d: '2-second pause at full draw', start: 12, top: 20, rest: 60, bow: true }),
-        rung({ n: 'Bow drills, next band up', d: 'Add the pause again once you reach the top', start: 12, top: 20, rest: 60, bow: true })
+        rung({ n: 'Bow drills, light band', d: 'Pull-aparts, rows with handles and archer draws', start: 12, top: 20, rest: 60, bow: true }),
+        rung({ n: 'Bow drills, light band, paused', d: '2-second pause at full draw', start: 12, top: 20, rest: 60, bow: true }),
+        rung({ n: 'Bow drills, medium band', d: 'Pull-aparts, rows with handles and archer draws', start: 12, top: 20, rest: 60, bow: true }),
+        rung({ n: 'Bow drills, medium band, paused', d: '2-second pause at full draw', start: 12, top: 20, rest: 60, bow: true }),
+        rung({ n: 'Bow drills, heavy band', d: 'Pull-aparts, rows with handles and archer draws', start: 12, top: 20, rest: 75, bow: true }),
+        rung({ n: 'Bow drills, heavy band, paused', d: '2-second pause at full draw', start: 12, top: 20, rest: 75, bow: true })
       ],
-      suggest: function (t) { return [0, clamp(round(0.6 * t), 8, 20)]; }
+      suggest: function (t) {
+        if (t >= 34) return [2, 12];
+        return [0, clamp(round(0.6 * t), 8, 20)];
+      }
     },
     walk: {
       name: 'Walking', people: 'hobbits',

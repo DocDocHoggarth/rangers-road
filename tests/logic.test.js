@@ -79,6 +79,14 @@ for (d = 16; d <= 20; d++) ['plank', 'band', 'squat'].forEach(function (e) { L.c
 aw = L.evaluateWeeks(z, day(2026, 11, 23));
 ok(aw[0].miles === 10, 'the week counts double while the Wizard is in the company');
 
+/* The band ladder */
+var bd = L.newState(MON);
+L.recordTrial(bd, 'band', 25, MON, true);
+ok(bd.ex.band.rung === 0 && L.rx(bd, 'band').text === '3 rounds: 15 pull-aparts, 11 rows with handles, 9 archer draws per side', 'a band trial of 25 starts on the light band: ' + L.rx(bd, 'band').text);
+L.recordTrial(bd, 'band', 40, MON, true);
+ok(bd.ex.band.rung === 2 && bd.ex.band.value === 12, 'a band trial of 40 starts on the medium band');
+ok(D.EXERCISES.band.rungs.length === 6, 'the band ladder has six rungs');
+
 /* Bonds and gifts */
 Object.keys(D.PEOPLES).forEach(function (p) {
   ok(D.PEOPLES[p].gifts.length === 4 && D.PEOPLES[p].gifts.every(function (g) { return g.name && /^gf-/.test(g.art); }), p + ' has four gifts, each with a name and a drawing');
