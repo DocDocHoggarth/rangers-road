@@ -21,7 +21,7 @@
       v: 1, created: now.toISOString(), onboarded: false, miles: 0, seq: 0,
       ex: {}, log: [], trialsPending: [], trialsDone: {}, tales: { 0: true },
       weeks: { through: null, streak: 0, best: 0 }, afar: {}, plan: null, roadSeen: 0, bondDates: {},
-      settings: { perWeek: 5, syncUrl: '', syncKey: '' },
+      settings: { perWeek: 5, syncUrl: '', syncKey: '', theme: 'auto' },
       sync: { sent: 0, lastOk: null }
     };
     D.EXERCISE_ORDER.forEach(function (id) {

@@ -14,6 +14,14 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="stylesheet" href="styles.css">
+<script>
+/* Choose the theme before the first paint, so a candlelight evening never flashes daylight. */
+try {
+  var t = (JSON.parse(localStorage.getItem('rangers-road-v1')) || {}).settings || {};
+  var dark = t.theme === 'dark' || (t.theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+} catch (e) { /* daylight */ }
+</script>
 </head>
 <body>
 <div id="app"><main id="view" aria-live="polite"></main></div>

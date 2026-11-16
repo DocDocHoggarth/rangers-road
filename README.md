@@ -18,7 +18,7 @@ It is a plain web app with no build step. It installs to a phone's home screen, 
 | `CLAUDE.md` | Working rules for anyone, or any assistant, changing the app |
 | `sw.js`, `manifest.webmanifest`, `*.png` | Home screen install and offline support |
 | `fell*.woff2`, `numerals*.woff2`, `hand.woff2` | Fonts: IM Fell English for text, digits from EB Garamond, and Caveat for handwriting. All are under the SIL Open Font License; see the `FONT-LICENSE*.txt` files. |
-| `paper.png`, `tools/make-paper.py` | The paper grain tile and the script that made it |
+| `paper.png`, `paper-night.png`, `tools/make-paper.py` | The paper grain tiles for daylight and candlelight, and the script that made them |
 | `sheet-script.gs` | The Google Apps Script for the Sheet backup. It is not loaded by the app. |
 
 ## Put it online with GitHub Pages

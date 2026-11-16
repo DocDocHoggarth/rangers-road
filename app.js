@@ -3,7 +3,7 @@
   'use strict';
   var D = self.RR_DATA, L = self.RR_LOGIC, EX = D.EXERCISES;
   var KEY = 'rangers-road-v1';
-  var VERSION = '1.0.10';
+  var VERSION = '1.0.11';
 
   var view = document.getElementById('view');
   var scrim = document.getElementById('scrim');
@@ -47,6 +47,20 @@
     if (!quiet && fresh.length) giftNote = fresh.map(function (f) { return ' A gift from ' + giver(f.people) + ': ' + f.gift.name.charAt(0).toLowerCase() + f.gift.name.slice(1) + '.'; }).join('');
   }
   function giver(pid) { return pid === 'wizard' ? 'the Wizard' : 'the ' + D.PEOPLES[pid].name; }
+
+  /* ---------- theme ---------- */
+  var darkQuery = self.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
+  function applyTheme() {
+    var mode = state.settings.theme || 'auto';
+    var dark = mode === 'dark' || (mode === 'auto' && !!darkQuery && darkQuery.matches);
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    var meta = document.querySelector('meta[name=theme-color]');
+    if (meta) meta.setAttribute('content', dark ? '#16110C' : '#DCC79B');
+  }
+  if (darkQuery) {
+    var onScheme = function () { if ((state.settings.theme || 'auto') === 'auto') applyTheme(); };
+    if (darkQuery.addEventListener) darkQuery.addEventListener('change', onScheme); else if (darkQuery.addListener) darkQuery.addListener(onScheme);
+  }
 
   /* ---------- helpers ---------- */
   function esc(s) {
@@ -120,7 +134,7 @@
       '<div class="overline">Stage ' + (idx + 1) + ' of ' + D.STAGES.length + ' · Book ' + ['One', 'Two', 'Three'][st.book - 1] + '</div>' +
       '<h1>' + esc(st.road) + '</h1>' +
       '<div class="miles"><b data-count="' + state.miles + '" data-from="' + from + '">' + fmt(from) + '</b><span class="muted it">of ' + fmt(D.TOTAL_MILES) + ' miles · ' + esc(L.title(state.miles)) + '</span></div>' +
-      '<div class="bar" role="img" aria-label="' + Math.round(pct) + ' percent of the road walked"><i style="transform:scaleX(' + (fp / 100).toFixed(4) + ')" data-tt="scaleX(' + (pct / 100).toFixed(4) + ')"></i><b class="knob" style="transform:translateX(' + fp.toFixed(2) + '%)" data-tt="translateX(' + pct.toFixed(2) + '%)"><s></s></b></div>' +
+      '<div class="bar" role="img" aria-label="' + Math.round(pct) + ' percent of the road walked"><i style="transform:scaleX(' + (fp / 100).toFixed(4) + ')" data-tt="scaleX(' + (pct / 100).toFixed(4) + ')"></i><s style="left:' + fp.toFixed(2) + '%" data-tl="' + pct.toFixed(2) + '%"></s></div>' +
       (nw ? '<div class="sub">' + fmt(L.r1(nw.mile - state.miles)) + ' miles to ' + esc(nw.name) + '</div>' : '<div class="sub">The road is walked.</div>') +
       '</header>';
   }
@@ -275,7 +289,9 @@
     var opts = [3, 4, 5, 6, 7].map(function (n) { return '<option value="' + n + '"' + (n === s.perWeek ? ' selected' : '') + '>' + n + ' marches a week</option>'; }).join('');
     var h = '<header class="head"><div class="overline">Journal</div><h1>Records and backup</h1>' +
       '<div class="sub">' + L.sessionDays(state, L.weekKey(now)) + ' of ' + s.perWeek + ' full marches this week</div></header>';
-    h += '<div class="card"><label class="field">An unbroken week needs<select id="perweek">' + opts + '</select></label></div>';
+    var themes = [['auto', 'Follow the phone'], ['light', 'Daylight'], ['dark', 'Candlelight']].map(function (o) { return '<option value="' + o[0] + '"' + ((s.theme || 'auto') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('');
+    h += '<div class="card stack"><label class="field">An unbroken week needs<select id="perweek">' + opts + '</select></label>' +
+      '<label class="field">Page<select id="theme">' + themes + '</select></label></div>';
     h += '' + section('Google Sheet') + '<div class="card"><p class="muted">Paste the web app address and passphrase from your Sheet’s script. The app then copies every entry to the Sheet whenever you are online.</p>' +
       '<div class="stack" style="margin-top:10px"><label class="field">Web app address<input type="url" id="syncurl" autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(s.syncUrl) + '" placeholder="https://script.google.com/macros/s/…/exec"></label>' +
       '<label class="field">Passphrase<input type="password" id="synckey" autocomplete="off" value="' + esc(s.syncKey) + '"></label></div>' +
@@ -466,7 +482,7 @@
         var s = migrate(JSON.parse(j.state));
         s.log = j.log || []; s.settings.syncUrl = url; s.settings.syncKey = key;
         s.sync = { sent: s.log.length, lastOk: new Date().toISOString() };
-        state = s; saveLocal(); render(); toast('Restored from your Sheet.');
+        state = s; saveLocal(); applyTheme(); render(); toast('Restored from your Sheet.');
       }).catch(function (e) { toast('Restore failed: ' + e.message); });
     },
     export: function () {
@@ -534,6 +550,8 @@
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         for (var i = 0; i < els.length; i++) els[i].style.transform = els[i].getAttribute('data-tt');
+        var dots = view.querySelectorAll('[data-tl]');
+        for (var j = 0; j < dots.length; j++) dots[j].style.left = dots[j].getAttribute('data-tl');
       });
     });
     if (!c) return;
@@ -603,6 +621,7 @@
   document.addEventListener('change', function (ev) {
     var el = ev.target;
     if (el.id === 'perweek') { state.settings.perWeek = +el.value; save(); render(); }
+    else if (el.id === 'theme') { state.settings.theme = el.value; applyTheme(); save(); }
     else if (el.id === 'adj-rung') { document.getElementById('adj-value').value = EX[el.dataset.ex].rungs[+el.value].start; }
     else if (el.id === 'importfile' && el.files && el.files[0]) {
       var reader = new FileReader();
@@ -611,7 +630,7 @@
           var s = JSON.parse(reader.result);
           if (!s || s.v !== 1 || !s.ex || !Array.isArray(s.log)) throw new Error('not a backup file');
           if (!confirm('Replace what is on this phone with this backup?')) return;
-          state = migrate(s); saveLocal(); render(); toast('Backup loaded.');
+          state = migrate(s); saveLocal(); applyTheme(); render(); toast('Backup loaded.');
         } catch (e) { toast('Could not read that file.'); }
       };
       reader.readAsText(el.files[0]);
@@ -629,6 +648,7 @@
     navigator.serviceWorker.register('sw.js').catch(function () { /* the app still works online */ });
   }
 
+  applyTheme();
   noteGifts(true);
   weekly();
   render();

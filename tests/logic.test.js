@@ -27,6 +27,7 @@ L.recordTrial(s, 'pushup', 20, MON, true);
 ok(L.rx(s, 'pushup').text === '3 × 12', 'a push-up trial of 20 gives 3 sets of 12');
 ok(s.miles === 0, 'baseline trials earn no miles');
 ok(s.roadSeen === 0, 'a new save has not seen the road yet');
+ok(s.settings.theme === 'auto', 'a new save follows the phone for its theme');
 
 /* Miles */
 var r = L.completeBlock(s, 'plank', MON);

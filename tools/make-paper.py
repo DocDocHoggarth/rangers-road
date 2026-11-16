@@ -37,4 +37,9 @@ for _ in range(70):
 
 img.putpalette(list(INK) + list(INK) + list(INK) + list(PALE))
 img.save('paper.png', optimize=True, bits=2, transparency=bytes([0, 16, 30, 46]))
-print('wrote paper.png')
+
+# The candlelight theme uses the same tile with the colours swapped: pale fibres, dark flecks.
+NIGHT_PALE = (234, 217, 176)
+img.putpalette(list(NIGHT_PALE) + list(NIGHT_PALE) + list(NIGHT_PALE) + [0, 0, 0])
+img.save('paper-night.png', optimize=True, bits=2, transparency=bytes([0, 10, 20, 60]))
+print('wrote paper.png and paper-night.png')
