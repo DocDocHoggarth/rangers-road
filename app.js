@@ -3,7 +3,7 @@
   'use strict';
   var D = self.RR_DATA, L = self.RR_LOGIC, EX = D.EXERCISES;
   var KEY = 'rangers-road-v1';
-  var VERSION = '1.0.9';
+  var VERSION = '1.0.10';
 
   var view = document.getElementById('view');
   var scrim = document.getElementById('scrim');
@@ -14,6 +14,9 @@
   var tab = 'today';
   var timers = {};
   var syncTimer = null, toastTimer = null, syncBusy = false, roadEnter = false, lastFocus = null, giftNote = '';
+  /* Motion: what was just tapped or finished, and the values last shown, so changes can be animated from them. */
+  var fresh = {}, shownMiles = null, seenBond = {};
+  var calm = !!(self.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   /* ---------- storage ---------- */
   function load() {
@@ -111,11 +114,13 @@
   function head() {
     var idx = L.stageIndexAt(state.miles), st = D.STAGES[idx], nw = nextWaypoint();
     var pct = Math.min(100, state.miles / D.TOTAL_MILES * 100);
+    var from = (calm || shownMiles === null || shownMiles > state.miles) ? state.miles : shownMiles, fp = Math.min(100, from / D.TOTAL_MILES * 100);
+    shownMiles = state.miles;
     return scene(st.scene) + '<header class="head">' +
       '<div class="overline">Stage ' + (idx + 1) + ' of ' + D.STAGES.length + ' · Book ' + ['One', 'Two', 'Three'][st.book - 1] + '</div>' +
       '<h1>' + esc(st.road) + '</h1>' +
-      '<div class="miles"><b>' + fmt(state.miles) + '</b><span class="muted it">of ' + fmt(D.TOTAL_MILES) + ' miles · ' + esc(L.title(state.miles)) + '</span></div>' +
-      '<div class="bar" role="img" aria-label="' + Math.round(pct) + ' percent of the road walked"><i style="width:' + pct.toFixed(2) + '%"></i><s style="left:' + pct.toFixed(2) + '%"></s></div>' +
+      '<div class="miles"><b data-count="' + state.miles + '" data-from="' + from + '">' + fmt(from) + '</b><span class="muted it">of ' + fmt(D.TOTAL_MILES) + ' miles · ' + esc(L.title(state.miles)) + '</span></div>' +
+      '<div class="bar" role="img" aria-label="' + Math.round(pct) + ' percent of the road walked"><i style="transform:scaleX(' + (fp / 100).toFixed(4) + ')" data-tt="scaleX(' + (pct / 100).toFixed(4) + ')"></i><b class="knob" style="transform:translateX(' + fp.toFixed(2) + '%)" data-tt="translateX(' + pct.toFixed(2) + '%)"><s></s></b></div>' +
       (nw ? '<div class="sub">' + fmt(L.r1(nw.mile - state.miles)) + ' miles to ' + esc(nw.name) + '</div>' : '<div class="sub">The road is walked.</div>') +
       '</header>';
   }
@@ -148,7 +153,7 @@
     var h = '<article class="card' + (it.done || it.missed ? ' done' : '') + '">' +
       '<div class="row top"><div class="who">' + emblem(e.people) + '<div><div class="overline">' + esc(people.name) + ' · ' + esc(people.trait) + '</div><h3>' + esc(e.name) + '</h3></div></div>' + tag + '</div>' +
       '<p class="muted">' + esc(p.rung.n) + (p.rung.d ? ' · ' + esc(p.rung.d) : '') + '</p>';
-    if (it.done) return h + '<p class="hand" style="margin-top:6px">Done · ' + esc(it.note || '') + ' +' + fmt(it.earned) + ' miles</p></article>';
+    if (it.done) return h + '<span class="stampmark' + (fresh.done === i ? ' fresh' : '') + '" aria-hidden="true">Done</span><p class="hand" style="margin-top:6px">Done · ' + esc(it.note || '') + ' +' + fmt(it.earned) + ' miles</p></article>';
     if (it.missed) return h + '<p class="it muted" style="margin-top:6px">Fell short today. No miles lost.</p></article>';
     h += '<p class="rx">' + esc(p.text) + '</p>';
     if (it.ex === 'walk') {
@@ -160,7 +165,7 @@
       if (p.sets > 1) {
         h += '<div class="sets" role="group" aria-label="Sets">';
         for (var n = 1; n <= p.sets; n++) {
-          h += '<button class="set' + (n <= it.ticks ? ' on' : '') + '" data-act="tick" data-i="' + i + '" data-n="' + n + '" aria-pressed="' + (n <= it.ticks) + '" aria-label="Set ' + n + ' of ' + p.sets + '">' + n + '</button>';
+          h += '<button class="set' + (n <= it.ticks ? ' on' : '') + (fresh.set === i + ':' + n ? ' fresh" style="--x:' + fresh.x + '%;--y:' + fresh.y + '%' : '') + '" data-act="tick" data-i="' + i + '" data-n="' + n + '" aria-pressed="' + (n <= it.ticks) + '" aria-label="Set ' + n + ' of ' + p.sets + '">' + n + '</button>';
         }
         h += '</div><div class="rest" data-rest="' + i + '"></div>';
         ready = it.ticks >= p.sets;
@@ -237,8 +242,10 @@
       var p = D.PEOPLES[pid], b = L.bond(state, pid);
       var prev = (pid === 'wizard' ? D.WIZARD_RANKS : D.BOND_RANKS)[b.index].at;
       var pct = b.next ? Math.min(100, (b.points - prev) / (b.next.at - prev) * 100) : 100;
+      var mTo = (pct / 100).toFixed(3), mFrom = calm ? mTo : (seenBond[pid] || '0');
+      seenBond[pid] = mTo;
       h += '<div class="bond"><div class="row"><div class="who">' + emblem(pid) + '<div><div class="overline">' + esc(p.trait) + '</div><h3>' + esc(p.name) + '</h3></div></div><span class="tag plain">' + esc(b.rank) + '</span></div>' +
-        '<div class="meter" role="img" aria-label="' + Math.round(pct) + ' percent to the next rank"><i style="width:' + pct.toFixed(1) + '%"></i></div>' +
+        '<div class="meter" role="img" aria-label="' + Math.round(pct) + ' percent to the next rank"><i style="transform:scaleX(' + mFrom + ')" data-tt="scaleX(' + mTo + ')"></i></div>' +
         '<p class="muted it" style="margin-top:6px">' + (b.next ? (pid === 'wizard' ? 'Best run of ' + b.points + (b.points === 1 ? ' unbroken week; ' : ' unbroken weeks; ') + esc(b.next.name) + ' at ' + b.next.at + '.' : b.points + (b.points === 1 ? ' bond point; ' : ' bond points; ') + esc(b.next.name) + ' at ' + b.next.at + '.') : 'The bond is complete.') + '</p>' +
         '<p style="margin-top:2px">' + (b.gifts.length ? 'Gifts: ' + esc(b.gifts.map(function (g) { return g.name.charAt(0).toLowerCase() + g.name.slice(1); }).join(', ')) + '.' : '<span class="muted">No gifts yet.</span>') + '</p></div>';
     });
@@ -365,18 +372,23 @@
       D.EXERCISE_ORDER.forEach(function (id) { var t = num('tr-' + id); if (t != null) L.recordTrial(state, id, t, now, true); });
       state.onboarded = true; state.plan = null; save(); render(); self.scrollTo(0, 0);
     },
-    tick: function (el) {
+    tick: function (el, ev) {
       var it = state.plan.items[+el.dataset.i], n = +el.dataset.n, p = L.rx(state, it.ex);
-      var was = it.ticks;
+      var was = it.ticks, box = el.getBoundingClientRect();
       it.ticks = it.ticks === n ? n - 1 : n;
-      if (it.ticks > was && it.ticks < p.sets && p.rest > 0) timers[el.dataset.i] = Date.now() + p.rest * 1000;
+      if (it.ticks > was) {
+        fresh.set = el.dataset.i + ':' + n;
+        fresh.x = ev && ev.clientX ? Math.round((ev.clientX - box.left) / box.width * 100) : 50;
+        fresh.y = ev && ev.clientY ? Math.round((ev.clientY - box.top) / box.height * 100) : 50;
+      }
+      if (it.ticks > was && it.ticks < p.sets && p.rest > 0) timers[el.dataset.i] = { end: Date.now() + p.rest * 1000, total: p.rest };
       else delete timers[el.dataset.i];
       saveLocal(); render();
     },
     finish: function (el) {
       var it = state.plan.items[+el.dataset.i];
       var res = L.completeBlock(state, it.ex, new Date());
-      it.done = true; it.earned = res.miles; delete timers[el.dataset.i];
+      it.done = true; it.earned = res.miles; delete timers[el.dataset.i]; fresh.done = +el.dataset.i;
       save(); render(); afterMiles(res, '+' + fmt(res.miles) + ' miles.');
     },
     miss: function (el) {
@@ -512,7 +524,27 @@
       if (btns[i].dataset.tab === tab) btns[i].setAttribute('aria-current', 'page'); else btns[i].removeAttribute('aria-current');
     }
     paintTimers();
+    settle();
+    fresh = {};
     if (tab === 'road') afterRoad();
+  }
+  /* Run the progress line, bond meters and mile count from the values last shown to the current ones. */
+  function settle() {
+    var els = view.querySelectorAll('[data-tt]'), c = view.querySelector('[data-count]');
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        for (var i = 0; i < els.length; i++) els[i].style.transform = els[i].getAttribute('data-tt');
+      });
+    });
+    if (!c) return;
+    var from = +c.getAttribute('data-from'), to = +c.getAttribute('data-count'), t0 = null;
+    if (from < to) requestAnimationFrame(function step(t) {
+      if (!document.contains(c)) return;
+      if (t0 === null) t0 = t;
+      var k = Math.min(1, (t - t0) / 600);
+      c.textContent = fmt(L.r1(from + (to - from) * k));
+      if (k < 1) requestAnimationFrame(step);
+    });
   }
   /* Let the ink run to its new position, bring the current leg into view, and remember how far it has been seen. */
   function afterRoad() {
@@ -536,10 +568,14 @@
   function paintTimers() {
     var els = document.querySelectorAll('[data-rest]'), now = Date.now();
     for (var i = 0; i < els.length; i++) {
-      var end = timers[els[i].dataset.rest];
-      if (!end) { els[i].textContent = ''; continue; }
-      var left = Math.ceil((end - now) / 1000);
-      if (left > 0) els[i].textContent = 'Rest ' + Math.floor(left / 60) + ':' + (left % 60 < 10 ? '0' : '') + (left % 60);
+      var tm = timers[els[i].dataset.rest];
+      if (!tm) { els[i].textContent = ''; continue; }
+      var left = Math.ceil((tm.end - now) / 1000);
+      if (left > 0) {
+        if (!els[i].firstChild || els[i].firstChild.nodeType !== 1) els[i].innerHTML = '<svg class="ring" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle class="go" cx="12" cy="12" r="9"/></svg><span></span>';
+        els[i].lastChild.textContent = 'Rest ' + Math.floor(left / 60) + ':' + (left % 60 < 10 ? '0' : '') + (left % 60);
+        els[i].firstChild.lastChild.style.strokeDashoffset = (56.55 * (1 - Math.max(0, tm.end - now) / (tm.total * 1000))).toFixed(1);
+      }
       else if (left > -20) els[i].textContent = 'Rest is over. Next set.';
       else { delete timers[els[i].dataset.rest]; els[i].textContent = ''; }
     }
@@ -555,10 +591,14 @@
 
   document.addEventListener('click', function (ev) {
     var t = ev.target.closest('[data-tab]');
-    if (t) { tab = t.dataset.tab; roadEnter = tab === 'road'; self.scrollTo(0, 0); render(); return; }
+    if (t) {
+      tab = t.dataset.tab; roadEnter = tab === 'road'; self.scrollTo(0, 0); render();
+      view.classList.remove('swap'); void view.offsetWidth; view.classList.add('swap');
+      return;
+    }
     if (ev.target === scrim) { closeSheet(); return; }
     var a = ev.target.closest('[data-act]');
-    if (a && !a.disabled && acts[a.dataset.act]) acts[a.dataset.act](a);
+    if (a && !a.disabled && acts[a.dataset.act]) acts[a.dataset.act](a, ev);
   });
   document.addEventListener('change', function (ev) {
     var el = ev.target;
