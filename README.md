@@ -4,6 +4,12 @@ A personal training journal. Every workout moves a Ranger along the road from Ho
 
 It is a plain web app with no build step. It installs to a phone's home screen, works offline, and keeps its data on the phone. It can also copy every entry to a Google Sheet.
 
+## What it looks like
+
+Everything is drawn in ink on parchment: a pen-and-ink scene for each of the 18 stages, an emblem for each people, a drawing for each of the 20 gifts, and hand-ruled borders. The Road page inks itself in as you walk. Reaching a waypoint opens a full page with its tale and a wax seal. A candlelight theme in dark leather and gold can follow the phone's setting or be chosen on the Journal page.
+
+The whole app is about 470 KB and works offline once it has been opened.
+
 ## Files
 
 | File | What it is |
