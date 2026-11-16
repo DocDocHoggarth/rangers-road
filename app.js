@@ -3,7 +3,7 @@
   'use strict';
   var D = self.RR_DATA, L = self.RR_LOGIC, EX = D.EXERCISES;
   var KEY = 'rangers-road-v1';
-  var VERSION = '1.0.8';
+  var VERSION = '1.0.9';
 
   var view = document.getElementById('view');
   var scrim = document.getElementById('scrim');
@@ -13,7 +13,7 @@
   var state = load();
   var tab = 'today';
   var timers = {};
-  var syncTimer = null, toastTimer = null, syncBusy = false, roadEnter = false, lastFocus = null;
+  var syncTimer = null, toastTimer = null, syncBusy = false, roadEnter = false, lastFocus = null, giftNote = '';
 
   /* ---------- storage ---------- */
   function load() {
@@ -37,7 +37,13 @@
     try { localStorage.setItem(KEY, JSON.stringify(state)); }
     catch (e) { toast('Could not save on this phone.'); }
   }
-  function save() { saveLocal(); queueSync(); }
+  function save() { noteGifts(false); saveLocal(); queueSync(); }
+  /* Note any bond rank newly reached. Unless quiet, the next message names the gift. */
+  function noteGifts(quiet) {
+    var fresh = L.noteBonds(state, new Date());
+    if (!quiet && fresh.length) giftNote = fresh.map(function (f) { return ' A gift from ' + giver(f.people) + ': ' + f.gift.name.charAt(0).toLowerCase() + f.gift.name.slice(1) + '.'; }).join('');
+  }
+  function giver(pid) { return pid === 'wizard' ? 'the Wizard' : 'the ' + D.PEOPLES[pid].name; }
 
   /* ---------- helpers ---------- */
   function esc(s) {
@@ -74,9 +80,11 @@
     return '<span aria-hidden="true"><span class="initial">' + art('f-scroll') + '<b>' + esc(text.charAt(0)) + '</b></span>' + esc(text.slice(1)) + '</span><span class="sr">' + esc(text) + '</span>';
   }
   function toast(msg) {
+    var long = !!giftNote;
+    if (giftNote) { msg += giftNote; giftNote = ''; }
     toastEl.textContent = msg; toastEl.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { toastEl.hidden = true; }, 4200);
+    toastTimer = setTimeout(function () { toastEl.hidden = true; }, long ? 7000 : 4200);
   }
   /* Sheets are dialogs: focus moves into them and goes back where it was when they close. */
   function openSheet(html, mode) {
@@ -232,7 +240,16 @@
       h += '<div class="bond"><div class="row"><div class="who">' + emblem(pid) + '<div><div class="overline">' + esc(p.trait) + '</div><h3>' + esc(p.name) + '</h3></div></div><span class="tag plain">' + esc(b.rank) + '</span></div>' +
         '<div class="meter" role="img" aria-label="' + Math.round(pct) + ' percent to the next rank"><i style="width:' + pct.toFixed(1) + '%"></i></div>' +
         '<p class="muted it" style="margin-top:6px">' + (b.next ? (pid === 'wizard' ? 'Best run of ' + b.points + (b.points === 1 ? ' unbroken week; ' : ' unbroken weeks; ') + esc(b.next.name) + ' at ' + b.next.at + '.' : b.points + (b.points === 1 ? ' bond point; ' : ' bond points; ') + esc(b.next.name) + ' at ' + b.next.at + '.') : 'The bond is complete.') + '</p>' +
-        '<p style="margin-top:2px">' + (b.gifts.length ? 'Gifts: ' + esc(b.gifts.join(', ')) + '.' : '<span class="muted">No gifts yet.</span>') + '</p></div>';
+        '<p style="margin-top:2px">' + (b.gifts.length ? 'Gifts: ' + esc(b.gifts.map(function (g) { return g.name.charAt(0).toLowerCase() + g.name.slice(1); }).join(', ')) + '.' : '<span class="muted">No gifts yet.</span>') + '</p></div>';
+    });
+    h += '</div>' + section('Pack') + '<div class="pack">';
+    ['hobbits', 'elves', 'dwarves', 'men', 'wizard'].forEach(function (pid) {
+      var p = D.PEOPLES[pid], have = L.bond(state, pid).index, ranks = pid === 'wizard' ? D.WIZARD_RANKS : D.BOND_RANKS;
+      p.gifts.forEach(function (g, gi) {
+        h += gi < have ?
+          '<button class="gift" data-act="gift" data-p="' + pid + '" data-g="' + gi + '">' + art(g.art, 'gart') + '<span>' + esc(g.name) + '</span></button>' :
+          '<div class="gift locked">' + art(g.art, 'gart') + '<span>' + esc(p.name) + ': ' + esc(ranks[gi + 1].name) + '</span></div>';
+      });
     });
     h += '</div>' + section('Training') + '<div class="card">';
     D.EXERCISE_ORDER.forEach(function (id) {
@@ -303,6 +320,13 @@
       (next ? 'Next: ' + esc(next.road) + ', with ' + esc(company(next.as)) + '.' : 'The road is walked.') +
       (pending ? ' ' + (w.great ? 'A great trial awaits.' : 'A trial awaits.') : '') + '</p></div>' +
       '<div class="btns"><button class="btn primary" data-act="close">Onward</button></div></div>', arrived ? 'full' : 'full still');
+  }
+  function giftSheet(pid, gi) {
+    var p = D.PEOPLES[pid], g = p.gifts[gi], ranks = pid === 'wizard' ? D.WIZARD_RANKS : D.BOND_RANKS;
+    var day = (state.bondDates || {})[pid + ':' + (gi + 1)];
+    openSheet('<div class="giftcard">' + art(g.art, 'gart big') + '<div class="overline">A gift from ' + esc(giver(pid)) + '</div><h2>' + esc(g.name) + '</h2>' +
+      '<p class="muted it" style="margin-top:6px">Given when you became ' + esc(ranks[gi + 1].name.toLowerCase()) + ' to ' + esc(giver(pid)) + (day ? ', on ' + esc(day) : '') + '.</p></div>' +
+      '<div class="btns"><button class="btn primary" data-act="close">Close</button></div>');
   }
   function chooseSheet(i) {
     var rows = D.EXERCISE_ORDER.map(function (id) {
@@ -396,6 +420,7 @@
     },
     trialskip: function (el) { L.finishTrial(state, +el.dataset.wi); save(); closeSheet(); render(); },
     tale: function (el) { taleSheet(+el.dataset.wi, false); },
+    gift: function (el) { giftSheet(el.dataset.p, +el.dataset.g); },
     adjust: function (el) { adjustSheet(el.dataset.ex); },
     adjsave: function (el) {
       var id = el.dataset.ex, s = state.ex[id], e = EX[id], t = num('adj-trial'), now = new Date();
@@ -564,6 +589,7 @@
     navigator.serviceWorker.register('sw.js').catch(function () { /* the app still works online */ });
   }
 
+  noteGifts(true);
   weekly();
   render();
 })();

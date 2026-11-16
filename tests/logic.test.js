@@ -78,6 +78,17 @@ for (d = 16; d <= 20; d++) ['plank', 'band', 'squat'].forEach(function (e) { L.c
 aw = L.evaluateWeeks(z, day(2026, 11, 23));
 ok(aw[0].miles === 10, 'the week counts double while the Wizard is in the company');
 
+/* Bonds and gifts */
+Object.keys(D.PEOPLES).forEach(function (p) {
+  ok(D.PEOPLES[p].gifts.length === 4 && D.PEOPLES[p].gifts.every(function (g) { return g.name && /^gf-/.test(g.art); }), p + ' has four gifts, each with a name and a drawing');
+});
+var g = L.newState(MON);
+ok(L.noteBonds(g, MON).length === 0, 'a new Ranger has no gifts');
+g.ex.pushup.blocks = 8; g.ex.swing.blocks = 3;
+var fresh = L.noteBonds(g, day(2026, 11, 20));
+ok(fresh.length === 1 && fresh[0].people === 'dwarves' && fresh[0].gift.name === 'A whetstone' && g.bondDates['dwarves:1'] === '2026-11-20', 'ten bond points earn the first gift and record the day');
+ok(L.noteBonds(g, day(2026, 11, 21)).length === 0 && g.bondDates['dwarves:1'] === '2026-11-20', 'a gift is only announced once');
+
 /* The end of the road */
 var e = L.newState(MON); e.miles = 2702;
 L.completeBlock(e, 'jog', MON);

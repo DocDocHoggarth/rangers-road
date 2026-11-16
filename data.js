@@ -7,15 +7,15 @@
 
   var PEOPLES = {
     hobbits: { name: 'Hobbits', trait: 'Endurance', emblem: 'e-hobbits', ex: ['walk', 'plank'],
-      gifts: ['A walking stick', 'A pouch of pipe-weed', 'A well-stocked pack', 'A seat by the fire'] },
+      gifts: [{ name: 'A walking stick', art: 'gf-stick' }, { name: 'A pouch of pipe-weed', art: 'gf-pouch' }, { name: 'A well-stocked pack', art: 'gf-pack' }, { name: 'A seat by the fire', art: 'gf-seat' }] },
     elves: { name: 'Elves', trait: 'Grace', emblem: 'e-elves', ex: ['pullup', 'band'],
-      gifts: ['A grey cloak', 'A coil of fine rope', 'A new bowstring', 'A leaf-shaped brooch'] },
+      gifts: [{ name: 'A grey cloak', art: 'gf-cloak' }, { name: 'A coil of fine rope', art: 'gf-rope' }, { name: 'A new bowstring', art: 'gf-bow' }, { name: 'A leaf-shaped brooch', art: 'gf-brooch' }] },
     dwarves: { name: 'Dwarves', trait: 'Strength', emblem: 'e-dwarves', ex: ['pushup', 'swing'],
-      gifts: ['A whetstone', 'Iron-shod boots', 'A shirt of mail', 'An axe from the Mountain'] },
+      gifts: [{ name: 'A whetstone', art: 'gf-whetstone' }, { name: 'Iron-shod boots', art: 'gf-boots' }, { name: 'A shirt of mail', art: 'gf-mail' }, { name: 'An axe from the Mountain', art: 'gf-axe' }] },
     men: { name: 'Men', trait: 'Vigor', emblem: 'e-men', ex: ['squat', 'jacks', 'jog'],
-      gifts: ['A hunting horn', 'A tall spear', 'A round shield', 'A banner of your own'] },
+      gifts: [{ name: 'A hunting horn', art: 'gf-horn' }, { name: 'A tall spear', art: 'gf-spear' }, { name: 'A round shield', art: 'gf-shield' }, { name: 'A banner of your own', art: 'gf-banner' }] },
     wizard: { name: 'The Wizard', trait: 'Constancy', emblem: 'e-wizard', ex: [],
-      gifts: ['A word of counsel', 'A box of fireworks', 'A staff of ash', 'A swift horse'] }
+      gifts: [{ name: 'A scroll of counsel', art: 'gf-scroll' }, { name: 'A box of fireworks', art: 'gf-fireworks' }, { name: 'A staff of ash', art: 'gf-staff' }, { name: 'A swift horse', art: 'gf-horse' }] }
   };
   var TRAINING_PEOPLES = ['hobbits', 'elves', 'dwarves', 'men'];
   var BOND_RANKS = [

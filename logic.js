@@ -20,7 +20,7 @@
     var s = {
       v: 1, created: now.toISOString(), onboarded: false, miles: 0, seq: 0,
       ex: {}, log: [], trialsPending: [], trialsDone: {}, tales: { 0: true },
-      weeks: { through: null, streak: 0, best: 0 }, afar: {}, plan: null, roadSeen: 0,
+      weeks: { through: null, streak: 0, best: 0 }, afar: {}, plan: null, roadSeen: 0, bondDates: {},
       settings: { perWeek: 5, syncUrl: '', syncKey: '' },
       sync: { sent: 0, lastOk: null }
     };
@@ -257,6 +257,21 @@
     var next = ranks[idx + 1] || null;
     return { points: points, rank: ranks[idx].name, index: idx, next: next, gifts: D.PEOPLES[people].gifts.slice(0, idx) };
   }
+  /* Record the day each bond rank is first reached. Returns the gifts that are new since the last call. */
+  function noteBonds(state, now) {
+    var fresh = [];
+    if (!state.bondDates) state.bondDates = {};
+    ['hobbits', 'elves', 'dwarves', 'men', 'wizard'].forEach(function (p) {
+      var idx = bond(state, p).index;
+      for (var i = 1; i <= idx; i++) {
+        if (!state.bondDates[p + ':' + i]) {
+          state.bondDates[p + ':' + i] = dayKey(now);
+          fresh.push({ people: p, gift: D.PEOPLES[p].gifts[i - 1] });
+        }
+      }
+    });
+    return fresh;
+  }
   function title(miles) { return D.TITLES[rankOf(miles, D.TITLES)].name; }
 
   function syncPayload(state) {
@@ -274,7 +289,7 @@
     completeBlock: completeBlock, shortWalk: shortWalk, missBlock: missBlock,
     recordTrial: recordTrial, trialExercises: trialExercises, finishTrial: finishTrial,
     sessionDays: sessionDays, evaluateWeeks: evaluateWeeks, buildPlan: buildPlan, ensurePlan: ensurePlan,
-    bond: bond, title: title, syncPayload: syncPayload, pushLog: pushLog
+    bond: bond, noteBonds: noteBonds, title: title, syncPayload: syncPayload, pushLog: pushLog
   };
   root.RR_LOGIC = L;
   if (typeof module !== 'undefined' && module.exports) module.exports = L;
